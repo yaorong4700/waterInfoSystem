@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.UserRoleManageMapper">
+	<sql id="UserRoleManageColumns">keyCode,roleName,pageID,queryRole,alterRole,specialRole1,
+	specialRole2,departmentFlag,deleteFlag,insertUser,insertDate,updateUser,updateDate</sql>
+
+	<resultMap type="UserRoleManage" id="userRoleManageResultMap">
+		<id column="keyCode" property="keyCode" />
+		<result column="roleName" property="roleName" />
+		<result column="pageID" property="pageID" />
+		<result column="pageName" property="pageName" />
+		<result column="queryRole" property="queryRole" />
+		<result column="alterRole" property="alterRole" />
+		<result column="specialRole1" property="specialRole1" />
+		<result column="specialRole2" property="specialRole2" />
+		<result column="specialRole3" property="specialRole3" />
+		<result column="showRoleFlag" property="showRoleFlag" />
+		<result column="uploadRoleFlag" property="uploadRoleFlag" />
+		<result column="downloadRoleFlag" property="downloadRoleFlag" />
+		<result column="departmentFlag" property="departmentFlag" />
+		<result column="deleteFlag" property="deleteFlag" />
+		<result column="insertUser" property="insertUser" />
+		<result column="insertDate" property="insertDate" />
+		<result column="updateUser" property="updateUser" />
+		<result column="updateDate" property="updateDate" />
+	</resultMap>
+	<select id="listAllRole" resultType="String" resultMap="userRoleManageResultMap">
+    select distinct KeyCode keyCode,RoleName roleName from user_role where DeleteFlag = 0;
+    </select>
+    <select id="getRoleByRoleName" parameterType="String" resultType="UserRoleManage">
+    select distinct RoleName roleName,KeyCode keyCode from user_role 
+    where RoleName = #{roleName} 
+    and DeleteFlag = 0;
+    </select>
+    <select id="listRoleCompetence" resultMap="userRoleManageResultMap" parameterType="String" resultType="UserRoleManage">
+    select 
+    tUR.KeyCode keyCode,
+    tUR.RoleName roleName,
+    tPM.PageID pageID,
+    tPM.PageName pageName,
+    tPM.SpecialRole1 specialRole1,
+	tPM.SpecialRole2 specialRole2,
+	tPM.SpecialRole3 specialRole3,
+	tUR.ShowRoleFlag showRoleFlag,
+    tUR.QueryRoleFlag queryRoleFlag,
+    tUR.AlterRoleFlag alterRoleFlag,
+    tUR.UploadRoleFlag uploadRoleFlag,
+    tUR.DownloadRoleFlag downloadRoleFlag,
+    tUR.SpecialRole1Flag specialRole1Flag,
+    tUR.SpecialRole2Flag specialRole2Flag,
+    tUR.SpecialRole3Flag specialRole3Flag,
+    tUR.DepartmentFlag departmentFlag
+    from page_info tPM
+    left outer join user_role tUR on tUR.PageID = tPM.PageID 
+    									and tUR.DeleteFlag = 0 
+    									and tUR.KeyCode = #{keyCode}
+    order by tPM.OrderNum;
+    </select>
+    
+    <update id="updateUserRoleManage" parameterType="UserRoleManage">
+		update user_role set
+		RoleName = #{roleName},
+		ShowRoleFlag = #{showRoleFlag},
+		QueryRoleFlag = #{queryRoleFlag},
+		AlterRoleFlag = #{alterRoleFlag},
+		UploadRoleFlag = #{uploadRoleFlag},
+		DownloadRoleFlag = #{downloadRoleFlag},
+		SpecialRole1Flag = #{specialRole1Flag},
+		SpecialRole2Flag = #{specialRole2Flag},
+		SpecialRole3Flag = #{specialRole3Flag},
+		DepartmentFlag = #{departmentFlag},
+		UpdateUser = #{updateUser},
+		UpdateDate = now()
+		where KeyCode = #{keyCode}
+		and PageID = #{pageID};
+	</update>
+	
+	<update id="deleteUserRoleManage" parameterType="UserRoleManage">
+	update user_role
+	set DeleteFlag = 1,
+	UpdateUser = #{updateUser},
+	UpdateDate = now()
+	where RoleName = #{roleName}
+	and KeyCode = #{keyCode}
+	</update>
+	
+	<insert id="insertUserRoleManage" parameterType="UserRoleManage" useGeneratedKeys="false" keyProperty="keyCode">
+	insert into user_role 
+	(KeyCode,
+	RoleName,
+	PageID,
+	ShowRoleFlag,
+	QueryRoleFlag,
+	AlterRoleFlag,
+	UploadRoleFlag,
+	DownloadRoleFlag,
+	SpecialRole1Flag,
+	SpecialRole2Flag,
+	SpecialRole3Flag,
+	DepartmentFlag,
+	DeleteFlag,
+	InsertUser,
+	InsertDate,
+	UpdateUser,
+	UpdateDate)
+	values
+	(#{keyCode},
+	#{roleName},
+	#{pageID},
+	#{showRoleFlag},
+	#{queryRoleFlag},
+	#{alterRoleFlag},
+	#{uploadRoleFlag},
+	#{downloadRoleFlag},
+	#{specialRole1Flag},
+	#{specialRole2Flag},
+	#{specialRole3Flag},
+	#{departmentFlag},
+	0,
+	#{insertUser},
+	now(),
+	#{updateUser},
+	now())
+	</insert>
+    
+    <resultMap type="PageMst" id="pageMstResultMap">
+    		<result column="pageID" property="pageID" />
+			<result column="pageName" property="pageName" />
+			<result column="specialRole1" property="specialRole1" />
+			<result column="specialRole2" property="specialRole2" />
+			<result column="specialRole3" property="specialRole3" />
+			<result column="insertUser" property="insertUser" />
+			<result column="insertDate" property="insertDate" />
+			<result column="updateUser" property="updateUser" />
+			<result column="updateDate" property="updateDate" />
+    
+    </resultMap>
+    
+    <select id="listAllPage" resultType="String" resultMap="pageMstResultMap">
+    	select PageID pageID,
+    	PageName pageName,
+    	SpecialRole1 specialRole1,
+    	SpecialRole2 specialRole2,
+     	SpecialRole3 specialRole3
+    	from page_info
+    	order by OrderNum;
+    </select>
+    <select id="getkeyCode" parameterType="map" resultType="String">
+		select Get_KeyCode(#{pjName},#{insertUser})
+		from dual
+	</select>
+	<select id="checkStaff" parameterType="String" resultType="int">
+		select count(*) from staff where URKeyCode=#{keyCode}
+	</select>
+</mapper>

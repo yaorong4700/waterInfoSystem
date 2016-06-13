@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.StaffMapper">
+    <sql id="staffColumns">jobNo,name,gender,dateGraduation,dateIntoCompany,positionID,superior,
+    departmentID,branchID,team,email,state,sort,role,password,memo,dateQuitCompany,companyName,comment
+        ,enrolementCode,jobCategory,sortID,designQualified,pmLevel,URKeyCode</sql>
+
+    <resultMap type="Staff" id="staffResultMap">
+
+        <id column="jobNo" property="jobNo" />
+        <result column="name" property="name" />
+        <result column="gender" property="gender" />
+        <result column="dateGraduation" property="dateGraduation" />
+        <result column="dateIntoCompany" property="dateIntoCompany" />
+        <result column="position" property="position" />
+        <result column="superior" property="superior" />
+        <result column="departmentID" property="departmentID" />
+        <result column="department" property="department" />
+        <result column="branchID" property="branchID" />
+        <result column="branch" property="branch" />
+        <result column="team" property="team" />
+        <result column="email" property="email" />
+        <result column="state" property="state" />
+        <result column="sort" property="sort"/>
+        <result column="role" property="role" />
+        <result column="password" property="password" />
+        <result column="memo" property="memo" />
+        <result column="stateName" property="stateName" />
+        <result column="dateQuitCompany" property="dateQuitCompany" />
+        <result column="comment" property="comment" />
+        <result column="companyName" property="companyName" />
+        <result column="enrolementCode" property="enrolementCode" />
+        <result column="jobCategory" property="jobCategory" />
+        <result column="pmLevel" property="pmLevel" />
+        <result column="designQualified" property="designQualified" />
+        <result column="sortID" property="sortID" />
+        <result column="URKeyCode" property="URKeyCode" />
+        <result column="roleName" property="roleName"/>
+    </resultMap>
+    <resultMap  type="String" id="staffMemotMap">
+    	<result column="memo" property="memo"/>
+    </resultMap>
+    <resultMap type="Staff" id="jobCategoryMap">
+    	<result column="jobCategory" property="jobCategory"/>
+    </resultMap>
+    
+    <select id="listAllStaff" resultMap="staffResultMap">
+    SELECT staffID,jobNo,name,gender,dateGraduation,dateIntoCompany,position,superior,
+       department,branch,email,state,sort,password,memo
+       ,case state when 1 then '在职' when 2 then '休假' when 3 then '离职' end as stateName
+       ,dateQuitCompany,companyName,enrolementCode,jobCategory,designQualified,pmLevel,comment,sortID,URKeyCode,roleName
+       FROM  view_staffview_CXEE ;
+    </select>
+    <select id="listAllStaffCT" resultMap="staffResultMap">
+	SELECT staffID,jobNo,name,gender,dateGraduation,dateIntoCompany,position,superior,
+       department,branch,email,state,sort,password,memo
+       ,case state when 1 then '在職' when 2 then '休職' when 3 then '退職' end as stateName
+       ,dateQuitCompany,companyName,enrolementCode,jobCategory,designQualified,pmLevel,comment,sortID,URKeyCode,roleName
+       FROM  view_staffview_CT ;
+    </select>
+    <select id="listStaffs"  parameterType="StaffReqParam" resultMap="staffResultMap">
+    SELECT  staffID,name,gender,position,departmentID,department,branchID,branch,email
+            ,superior
+            ,IFNULL(dateQuitCompany,'') as dateQuitCompany
+            ,comment
+            ,case state when 1 then '在职' when 2 then '休假' when 3 then '离职' end as stateName
+            ,case role when 1 then '普通权限' when 2 then '超级管理员' when 3 then '职制' when 4 then '工数担当' end as role
+            ,URKeyCode
+            ,IFNULL(roleName,'') as roleName
+     FROM view_staffview_CXEE WHERE staffID NOT IN
+    ( SELECT staffID FROM (SELECT staffID FROM view_staffview_CXEE where 1 = 1
+    		
+    <if test="staffName!=null">
+            and name like CONCAT('%','${staffName}','%')
+    </if>
+
+    <if test="position!=null">
+            <!-- and position like CONCAT('%','${position}','%') -->
+            and positionID = ${position}
+    </if>
+
+    <if test="branch!=null">
+            <!-- and branch like CONCAT('%','${branch}','%') -->
+            and branchID = ${branch}
+    </if>
+
+    <if test="department!=null">
+            <!-- and department like CONCAT('%','${department}','%' ) -->
+            and departmentID = ${department}
+    </if>
+    <if test="superior!=null">
+            and superior like CONCAT('%','${superior}','%' )
+    </if>
+    <if test="dateQuitCompany!=null">
+        and dateQuitCompany >= #{dateQuitCompany}
+		and dateQuitCompany &lt;= #{dateQuitCompanyEnd}
+    </if>
+    <if test="stateName!=null">
+            <!-- and ( (#{stateName} = '在职' and state = '1')
+                 or (#{stateName} = '休假' and state = '2')
+                 or (#{stateName} = '离职' and state = '3')
+                    ) -->
+            and state = #{stateName}
+    </if>
+
+    ORDER BY staffID  LIMIT #{pageSeq} ) AS T)
+   			and email not like concat('%','.co.jp','%')
+    <if test="staffName!=null">
+            and name like CONCAT('%','${staffName}','%' )
+    </if>
+
+    <if test="position!=null">
+            <!-- and position like CONCAT('%','${position}','%' ) -->
+            and positionID = ${position}
+    </if>
+
+    <if test="branch!=null">
+            <!-- and branch like CONCAT('%','${branch}','%' ) -->
+            and branchID = ${branch}
+    </if>
+
+    <if test="department!=null">
+            <!-- and department like CONCAT('%','${department}','%' ) -->
+            and departmentID = ${department}
+    </if>
+    <if test="dateQuitCompany!=null">
+        and dateQuitCompany >= #{dateQuitCompany}
+		and dateQuitCompany &lt;= #{dateQuitCompanyEnd}
+    </if>
+    <if test="superior!=null">
+            and superior like CONCAT('%','${superior}','%' )
+    </if>
+    <if test="stateName!=null">
+            <!-- and ( (#{stateName} = '在职' and state = '1')
+                 or (#{stateName} = '休假' and state = '2')
+                 or (#{stateName} = '离职' and state = '3')
+                    ) -->
+            and state = #{stateName}
+    </if>
+    ORDER BY staffID  LIMIT #{rp}
+    </select>
+
+    <select id="totalPageCount" parameterType="StaffReqParam" resultType="int">
+        select count(1) from view_staffview_CXEE where 1=1
+        	and email not like concat('%','co.jp','%')
+        <if test="staffName!=null">
+            and name like CONCAT('%','${staffName}','%' )
+        </if>
+
+        <if test="position!=null">
+            <!-- and position like CONCAT('%','${position}','%') -->
+            and positionID = ${position}
+       </if>
+
+       <if test="branch!=null">
+            <!-- and branch like CONCAT('%','${branch}','%') -->
+            and branchID = ${branch}
+       </if>
+
+       <if test="department!=null">
+            <!-- and department like CONCAT('%','${department}','%' ) -->
+            and departmentID = ${department}
+       </if>
+       <if test="dateQuitCompany!=null">
+		    and dateQuitCompany >= #{dateQuitCompany}
+		    and dateQuitCompany &lt;= #{dateQuitCompanyEnd}
+       </if>
+        <if test="superior!=null">
+            and superior like CONCAT('%','${superior}','%' )
+        </if>
+        <if test="stateName!=null">
+            <!-- and ( (#{stateName} = '在职' and state = '1')
+                 or (#{stateName} = '休假' and state = '2')
+                 or (#{stateName} = '离职' and state = '3')
+                    ) -->
+            and state = #{stateName}
+        </if>
+    </select>
+    
+	<select id="listStaffsCT"  parameterType="StaffReqParam" resultMap="staffResultMap">
+    SELECT  staffID,name,position,departmentID,department,branchID,branch,email
+            ,comment
+            ,case state when 1 then '在職' when 2 then '休職' when 3 then '退職' when 4 then '異動' end as stateName
+            ,URKeyCode
+            ,IFNULL(roleName,'') roleName
+     FROM view_staffview_CT WHERE staffID NOT IN
+    ( SELECT staffID FROM (SELECT staffID FROM view_staffview_CT where 1 = 1
+    		and email like concat('%','.co.jp','%')
+    <if test="staffName!=null">
+            and name like CONCAT('%','${staffName}','%')
+    </if>
+    <if test="position!=null">
+            and positionID = ${position}
+    </if>
+
+    <if test="branch!=null">
+            and branchID = ${branch}
+    </if>
+
+    <if test="department!=null">
+            and departmentID = ${department}
+    </if>
+    <if test="stateName!=null">
+            and state = #{stateName}
+    </if>
+
+    ORDER BY staffID  LIMIT #{pageSeq} ) AS T)
+    		and email like concat('%','.co.jp','%')
+    <if test="staffName!=null">
+            and name like CONCAT('%','${staffName}','%' )
+    </if>
+    <if test="position!=null">
+            and positionID = ${position}
+    </if>
+    <if test="branch!=null">
+            and branchID = ${branch}
+    </if>
+    <if test="department!=null">
+            and departmentID = ${department}
+    </if>
+    <if test="stateName!=null">
+            and state = #{stateName}
+    </if>
+    ORDER BY staffID  LIMIT #{rp}
+    </select>
+
+    <select id="totalPageCountCT" parameterType="StaffReqParam" resultType="int">
+		select count(1) from view_staffview_CT where 1=1
+			and email like concat('%','co.jp','%')
+        <if test="staffName!=null">
+            and name like CONCAT('%','${staffName}','%' )
+        </if>
+        <if test="position!=null">
+            and positionID = ${position}
+		</if>
+		<if test="branch!=null">
+            and branchID = ${branch}
+		</if>
+		<if test="department!=null">
+            and departmentID = ${department}
+		</if>
+        <if test="stateName!=null">
+            and state = #{stateName}
+        </if>
+    </select>
+    
+    <select id="getStaffInfo" parameterType="Staff" resultMap="staffResultMap">
+        select * from staffview where 1=1
+        <if test="email!=null and password!=null">
+            and email = #{email} and password=#{password}
+        </if>
+        <if test="staffID!=null and staffID>0">
+            and id = #{id}
+        </if>
+    </select>
+
+    <select id="getStaffById" parameterType="int" resultMap="staffResultMap">
+        select *
+        from staffview  where staffID = #{staffID}
+    </select>
+    <select id="getStaffByIdCXEE" parameterType="int" resultMap="staffResultMap">
+        select *
+        from view_staffview_CXEE  where staffID = #{staffID}
+    </select>
+    <select id="getStaffByIdCT" parameterType="int" resultMap="staffResultMap">
+        select *
+        from view_staffview_CT  where staffID = #{staffID}
+    </select>
+    <update id="updateStaffpassword" parameterType="map"  >
+        update staff
+        set password=#{mypasswordnew}
+        where staffID=#{staffID}
+    </update>
+
+    <insert id="insertStaff" parameterType="Staff" useGeneratedKeys="true" keyProperty="staffID">
+        insert into staff (
+        <include refid="staffColumns" />
+        ) SELECT #{jobNo},#{name},#{gender},#{dateGraduation},#{dateIntoCompany},
+        #{positionID},#{superior},#{departmentID},#{branchID},#{team},#{email},#{state},
+        #{sort},#{role},#{password},#{memo},#{dateQuitCompany},#{companyName},#{comment}
+        ,#{enrolementCode},#{jobCategory},#{sortID},#{designQualified},#{pmLevel},#{URKeyCode}  FROM dual
+        WHERE not exists (select * from staff
+        where email = #{email});
+    </insert>
+
+    <delete id="deleteStaffs" >
+        delete from staff where
+        staffID in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+         #{item}
+       </foreach>
+    </delete>
+
+    <update id="updateStaff" parameterType="staff">
+        update staff set
+        jobNo = #{jobNo},
+        name = #{name},
+        gender = #{gender},
+        dateGraduation = #{dateGraduation},
+        dateIntoCompany = #{dateIntoCompany},
+        positionID = #{positionID},
+        superior = #{superior},
+        departmentID = #{departmentID},
+        branchID = #{branchID},
+        team = #{team},
+        email = #{email},
+        state = #{state},
+        sort = #{sort},
+        role = #{role},
+        <!-- password = #{password}, -->
+        memo = #{memo},
+        dateQuitCompany = #{dateQuitCompany},
+        companyName = #{companyName},
+        comment = #{comment},
+        enrolementCode = #{enrolementCode},
+        jobCategory = #{jobCategory},
+        sortID = #{sortID},
+        designQualified = #{designQualified},
+        pmLevel = #{pmLevel},
+        URKeyCode = #{URKeyCode}
+        where
+        staffID=#{staffID}
+    </update>
+    <select id="getStaffByEmail" parameterType="String" resultType="int">
+        select IFNULL((select staffID from staff  where email = #{email}),0)
+    </select>
+    <select id="getStaffByJobNo" parameterType="String" resultType="int">
+        select IFNULL((select staffID from staff  where jobNo = #{jobNo}),0)
+    </select>
+    <select id="getSort" parameterType="String" resultType="String">
+        select sort from staff_sort  where sortID = #{sortID}
+    </select>
+   	<select id="getAbility" parameterType="String" resultMap="staffMemotMap">
+   		select distinct memo from staff where memo is not null
+   	</select>
+   	<select id="getAllSort" resultType="com.clarion.worksys.entity.StaffSort">
+   		select id, sortid,sort from view_staffsort_cxee where sort is not null
+   	</select>
+   	<select id="getJobCategory" resultMap="jobCategoryMap">
+   		select distinct jobCategory from view_staffview_cxee where jobCategory is not null 
+   	</select>
+   		<select id="getAbilityCT" parameterType="String" resultMap="staffMemotMap">
+   		select distinct memo from staff where memo is not null
+   	</select>
+   	<select id="getAllSortCT" resultType="com.clarion.worksys.entity.StaffSort">
+   		select id, sortid,sort from view_staffsort_ct where sort is not null
+   	</select>
+   	<select id="getJobCategoryCT" parameterType="Staff" resultMap="jobCategoryMap">
+   		select distinct jobCategory from view_staffview_ct where jobCategory is not null 
+   	</select>
+</mapper>

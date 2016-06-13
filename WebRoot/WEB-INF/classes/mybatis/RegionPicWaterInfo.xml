@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.RegionPicMapper">
+
+ 	<resultMap type="WaterInfo" id="searchListResutMap">
+ 		<result column="RegionID" property="regionID"/>
+ 		<result column="DeviceID" property="deviceID"/>
+ 		<result column="CollectTime" property="collectTime"/>
+ 		<result column="WaterPic" property="waterPic"/>
+ 		<result column="WaterNumber" property="waterNumber"/>
+ 		<result column="IdentifyFlag" property="identifyFlag"/>
+ 		<result column="InsertUser" property="insertUser"/>
+ 		<result column="InsertTime" property="insertTime"/>
+ 		<result column="UpdateUser" property="updateUser"/>
+ 		<result column="UpdateTime" property="updateTime"/>
+ 		<result column="DeviceAddress" property="deviceAddress"/>
+ 		<result column="CodeValue" property="codeValue"/>
+ 		<result column="RegionSummary" property="regionSummary"/>
+ 	</resultMap>
+ 	
+ 	<select id="searchRegionPicList" parameterType="RegionPicReqParam" resultMap="searchListResutMap">
+ 		select a.RegionID,a.DeviceID,a.CollectTime,a.WaterNumber,a.IdentifyFlag,d.CodeValue,
+			   b.RegionSummary,c.DeviceAddress,a.WaterPic from tbl_waterinfo a,Tbl_RegionInfo_Mst b,Tbl_DeviceInfo_Mst c,Tbl_Code_Mst d
+		where a.RegionID = b.RegionID
+		  and a.DeviceID = c.DeviceID
+		  and d.CodeKey = 'C001' and d.CodeType1 = a.IdentifyFlag
+		  	<if test="regionId !=null">
+ 			and a.RegionID = #{regionId}
+ 			</if>
+ 			<if test="collectTimeStart !=null and collectTimeEnd !=null">
+ 			and a.collectTime between #{collectTimeStart} and #{collectTimeEnd}
+ 			</if>
+ 			<if test="collectTimeStart !=null and collectTimeEnd == null">
+ 		 	and a.collectTime &gt;= #{collectTimeStart}
+ 			</if>
+ 			<if test="collectTimeStart ==null and collectTimeEnd != null">
+ 		 	and a.collectTime &lt;= #{collectTimeEnd}
+ 			</if>
+ 		order by a.UpdateTime desc
+ 		limit #{pageSeq},#{rp}
+ 	</select>
+ 	
+ 	<select id="totalPageCount" parameterType="RegionPicReqParam" resultType="int">
+ 		select count(1) from 
+ 			(
+ 			select a.RegionID,a.DeviceID,a.CollectTime,a.WaterNumber,a.IdentifyFlag,d.CodeValue,
+			  		 b.RegionSummary,c.DeviceAddress from tbl_waterinfo a,Tbl_RegionInfo_Mst b,Tbl_DeviceInfo_Mst c,Tbl_Code_Mst d
+			where 	 a.RegionID = b.RegionID
+			  and 	 a.DeviceID = c.DeviceID
+		 	  and 	 d.CodeKey = 'C001' and d.CodeType1 = a.IdentifyFlag
+		  	<if test="regionId !=null">
+ 			and a.RegionID = #{regionId}
+ 			</if>
+ 			<if test="collectTimeStart !=null and collectTimeEnd !=null">
+ 			and a.collectTime between #{collectTimeStart} and #{collectTimeEnd}
+ 			</if>
+ 			<if test="collectTimeStart !=null and collectTimeEnd == null">
+ 		 	and a.collectTime &gt;= #{collectTimeStart}
+ 			</if>
+ 			<if test="collectTimeStart ==null and collectTimeEnd != null">
+ 		 	and a.collectTime &lt;= #{collectTimeEnd}
+ 			</if>
+ 			) e
+ 	</select>
+ 	
+ 	<update id="editNumByRegionDeviceCollectTime" parameterType="RegionPicReqParam">
+ 		update tbl_waterinfo a 
+ 		set
+ 		a.waterNumber = #{waterNum}
+ 		where a.regionId = #{regionId} 
+		and a.deviceId = #{deviceId}
+		and a.collectTime = #{collectTime}
+ 	</update>
+ 	
+ 	<delete id="deleteByRegionDeviceCollectTime" parameterType="RegionSumReqParam">
+ 		delete from tbl_waterinfo
+		where tbl_waterinfo.RegionID = #{regionID}
+		and tbl_waterinfo.DeviceID= #{deviceID}
+		and tbl_waterinfo.CollectTime=#{collectTime}
+ 	</delete>
+ 	
+ 	 <select id="downloadregionSumShow" parameterType="RegionSumReqParam" resultMap="searchListResutMap">
+ 		select a.RegionID,a.DeviceID, a.CollectTime,b.RegionSummary,a.WaterNumber,c.DeviceAddress
+			from Tbl_WaterInfo a,Tbl_RegionInfo_Mst b,Tbl_DeviceInfo_Mst c,
+			(select b.DeviceID,MAX(b.CollectTime) as 'CollectTime' from tbl_waterinfo b
+			 group by b.DeviceID) d
+ 			where a.RegionID = b.RegionID 
+			and   a.DeviceID = c.DeviceID
+			and   a.DeviceID = d.DeviceID 
+			and   a.CollectTime = d.CollectTime 
+ 		group by a.DeviceID
+ 		order by a.RegionID
+ 	</select>
+</mapper>

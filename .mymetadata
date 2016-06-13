@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="workNumSys老版集计"
+  id="myeclipse.1322637259000"
+  context-root="/workNumSys"
+  j2ee-spec="5.0"
+  archive="workNumSys老版集计.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

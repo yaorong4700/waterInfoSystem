@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.Project_taskMapper">
+	<resultMap type="Project_task" id="project_taskResultMap">
+		<id column="taskID" property="taskID"/>
+		<result column="category" property="category"/>
+		<result column="task" property="task"/>
+		<result column="activity" property="activity"/>
+		<result column="memo" property="memo"/>
+		<result column="department" property="department"/>
+	</resultMap>
+	
+	<!-- selectTask -->
+	<select id="listAllTask" resultMap="project_taskResultMap">
+		select taskID
+	,categoryID
+	,category
+	,task
+	,taskProcessID
+	,memo
+	,activity
+	,CASE isVisible
+		WHEN '1' THEN '表示'
+		ELSE '非表示'   
+     END as isVisible
+	,departmentID
+	,department
+	 from projecttaskview
+	</select>
+	
+	<!-- getTaskByCategory -->
+	<select id="getTaskByCategory" parameterType="String" resultMap="project_taskResultMap">
+		select * from projecttaskview where category = #{category}
+	</select>
+	
+	<!-- getActivityByTask -->
+	<select id="getActivityByTask" parameterType="String" resultMap="project_taskResultMap">
+		select * from projecttaskview where task=#{task}
+	</select>
+	
+	<!-- listAllTask -->
+	<select id="selectAllTask" parameterType="ProjectTaskReqParam" resultMap="project_taskResultMap">
+	select taskID
+	,categoryID
+	,category
+	,task
+	,taskProcessID
+	,memo
+	,activity
+	,CASE isVisible
+		WHEN '1' THEN '表示'
+		ELSE '非表示'   
+     END as isVisible
+	,departmentID
+	,department
+	from projecttaskview
+	where taskID not in
+	(select taskID from (select taskID from projecttaskview
+	where 1=1  
+	<if test="category!=null">
+		and category like CONCAT('%','${category}','%' )
+	</if>
+	<if test="task!=null">
+		and task like CONCAT('%','${task}','%' )
+	</if>
+	<if test="department!=null">
+		and department like CONCAT('%','${department}','%' )
+	</if>
+	<if test="DepartmentFlag != 1">
+		and departmentID = #{departmentID}
+	</if>
+	order by category ,department ,taskID asc limit #{pageSeq}) as t)
+	<if test="category!=null">
+		and category like CONCAT('%','${category}','%' )
+	</if>
+	<if test="task!=null">
+		and task like CONCAT('%','${task}','%' )
+	</if>
+	<if test="department!=null">
+		and department like CONCAT('%','${department}','%' )
+	</if>
+	<if test="DepartmentFlag != 1">
+		and departmentID = #{departmentID}
+	</if>
+	order by category ,department ,taskID limit #{rp}
+	</select>
+	
+	<select id="totalPageCount" parameterType="ProjectTaskReqParam" resultType="int">
+		select count(1) from projecttaskview
+	    where 1=1
+	    <if test="category!=null">
+			and category like CONCAT('%','${category}','%' )
+		</if>
+		<if test="task!=null">
+			and task like CONCAT('%','${task}','%' )
+		</if>
+		<if test="department!=null">
+		and department like CONCAT('%','${department}','%' )
+		</if> 
+		<if test="DepartmentFlag != 1">
+			and departmentID = #{departmentID}
+		</if>
+	</select>
+	
+	<!-- getTaskByID -->
+	<select id="getTaskByID" parameterType="int" resultMap="project_taskResultMap">
+		select *
+		from projecttaskview  where taskID = #{taskID}
+	</select>
+	
+	<!-- 插入新的作业类型 -->
+	<insert id="insertNewProjectTask" parameterType="Project_task" useGeneratedKeys="true" keyProperty="taskID">
+		insert into project_task (category,task,activity,memo,department,departmentID,categoryID,taskProcessID,isVisible)
+		values(#{category},#{task},#{activity},#{memo},#{department},#{department},#{categoryID},#{taskProcessID},#{isVisible})
+	</insert>
+	
+	<update id="updateProjectTask" parameterType="Project_task">
+		update project_task set
+		category = #{category},
+		categoryID = #{categoryID},
+		task = #{task},
+		activity = #{activity},
+		memo = #{memo},
+		departmentID = #{department},
+		taskProcessID = #{taskProcessID},
+		isVisible = #{isVisible}
+		where
+		taskID=#{taskID}
+	</update>
+	
+	<delete id="delectProjectTask">
+		delete from project_task where taskID in
+		<foreach collection="array" index="index" item="item" open="(" separator="," close=")">  
+         #{item}
+         </foreach>
+	</delete>
+
+	<!-- getTaskByDepartment -->
+	<select id="getTaskByDepartment" parameterType="String" resultType="String">
+        select task
+          from projecttaskview
+         where departmentID = #{departmentID}
+         order by category, department, '--' + task
+	</select>
+	<select id="getDepartmentList" resultType="map">
+		SELECT departmentID as "departmentID",department as "department" FROM department
+	</select>
+	<select id="getCategoryList" resultType="map">
+		SELECT categoryID as "categoryID",category as "categoryName" FROM project_category
+	</select>
+	<select id="getTaskIDByCDP" parameterType="map" resultType="int">
+	select ifnull((	select ifnull(taskID,0) as taskID 
+		  from project_task
+		 where categoryID = #{categoryID}
+		   and departmentID = #{departmentID}
+		   and taskProcessID = #{taskProcessID} ),0) as taskID
+	</select>
+	<select id="checkID" parameterType="int" resultType="int">
+		select count(*) from project_task where taskID=#{taskID}
+	</select>
+</mapper>
+

@@ -1,0 +1,1550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.ProjectMapper">
+	<resultMap type="Project" id="projectResultMap">
+		<id column="projectID" property="projectID" />
+		<result column="category" property="category" />
+		<result column="projectName" property="projectName" />
+	</resultMap>
+
+	<resultMap type="Project" id="projectShowResultMap">
+		<id column="projectID" property="projectID" />
+		<result column="category" property="category" />
+		<result column="projectName" property="projectName" />
+		<result column="projectClientNo" property="projectClientNo" />
+		<result column="projectClientName" property="projectClientName" />
+		<result column="projectState" property="projectState" />
+		<result column="transferNo" property="transferNo" />
+		<result column="function" property="function" />
+		<result column="carMaker" property="carMaker" />
+	</resultMap>
+
+	<resultMap type="Project" id="projectShowResultMapCT">
+		<id column="projectID" property="projectID" />
+		<result column="PJNo" property="PJNo" />
+		<result column="tempPJNo" property="tempPJNo" />
+		<result column="PJName" property="PJName" />
+		<result column="category" property="category" />
+		<result column="itemName" property="itemName" />
+		<result column="carMaker" property="carMaker" />
+		<result column="projectState" property="projectState" />
+		<result column="function" property="function" />
+	</resultMap>
+	<resultMap type="Project" id="projectShowResultMapCommon">
+		<id column="projectID" property="projectID" />
+		<result column="PJNo" property="PJNo" />
+		<result column="tempPJNo" property="tempPJNo" />
+		<result column="PJName" property="PJName" />
+		<result column="category" property="category" />
+		<result column="itemName" property="itemName" />
+		<result column="carMaker" property="carMaker" />
+		<result column="projectState" property="projectState" />
+		<result column="function" property="function" />
+		<result column="projectName" property="projectName" />
+		<result column="projectClientNo" property="projectClientNo" />
+		<result column="projectClientName" property="projectClientName" />
+	</resultMap>
+	<resultMap type="Project" id="projectShowAllResultMap">
+		<id column="projectID" property="projectID" />
+		<result column="category" property="category" />
+		<result column="directProjectID" property="directProjectID" />
+		<result column="projectName" property="projectName" />
+		<result column="projectClientNo" property="projectClientNo" />
+		<result column="projectClientName" property="projectClientName" />
+		<result column="startupDate" property="startupDate" />
+		<result column="finishDate" property="finishDate" />
+		<result column="projectState" property="projectState" />
+		<result column="carMaker" property="carMaker" />
+		<result column="enterpriseSeg" property="enterpriseSeg" />
+		<result column="function" property="function" />
+		<result column="model" property="model" />
+		<result column="transferNo" property="transferNo" />
+		<result column="itemName" property="itemName" />
+		<result column="PJNo" property="PJNo" />
+		<result column="tempPJNo" property="tempPJNo" />
+		<result column="PJName" property="PJName" />
+		<result column="memo" property="memo" />
+		<result column="carMakerID" property="carMakerID" />
+		<result column="enterpriseSegID" property="enterpriseSegID" />
+		<result column="functionID" property="functionID" />
+		<result column="memo" property="memo" />
+	</resultMap>
+
+	<resultMap type="Project" id="ProjectForDepartmentResultMap">
+		<result column="projectDepartmentID" property="projectDepartmentID" />
+		<result column="projectDepartment" property="projectDepartment" />
+	</resultMap>
+	<resultMap type="Project" id="ProjectForBranchResultMap">
+		<result column="projectBranchID" property="projectBranchID" />
+		<result column="projectBranch" property="projectBranch" />
+	</resultMap>
+	
+	<resultMap type="Project" id="AllProClientName">
+		<result column="projectClientName" property="projectClientName"/>
+	</resultMap>
+	<resultMap type="Project" id="AllProFuntion">
+		<result column="functionName" property="function"/>
+	</resultMap>
+	<resultMap type="Project" id="AllProCarMaker">
+		<result column="carmake" property="carMaker"/>
+	</resultMap>
+	
+	<resultMap type="Project" id="AllTransferNo">
+		<result column="transferNo" property="transferNo"/>
+	</resultMap>
+	<resultMap type="com.clarion.worksys.entity.Stage" id="AllStage">
+		<result column="categoryID" property="categoryID"/>
+		<result column="category" property="category"/>
+		<result column="memo" property="memo"/>
+	</resultMap> 
+	
+	
+	<select id="downLoadShowAllProject" resultMap="projectShowAllResultMap">
+		select
+		a.projectID,a.projectName,a.category,a.projectClientNo,a.projectClientName,a.startupDate,a.finishDate,a.projectState,
+		a.carMaker,a.function,a.model,a.transferNo,a.itemName,a.PJNo,a.tempPJNo,a.PJName,a.memo
+		from project_cxee a,project_department_cxee b
+		where a.projectID = b.projectID
+        and b.departmentID in (select departmentID from view_department_cxee)
+        group by projectID
+	</select>
+	
+	<select id="downLoadShowAllProjectCT" resultMap="projectShowAllResultMap">
+		select
+		a.projectID,a.PJNo,a.tempPJNo,a.PJName,a.category,a.transferNo,a.itemName,a.startupDate,a.finishDate,a.projectState,
+		a.carMaker,a.enterpriseSeg,a.function,a.memo
+		from project_ct a,project_department_ct b
+		where a.projectID = b.projectID
+        and b.departmentID in (select departmentID from view_department_ct)
+        group by projectID
+	</select>
+	
+	<select id="downLoadShowAllProjectCommon" resultMap="projectShowAllResultMap">
+		select
+		projectID,PJNo,tempPJNo,PJName,transferNo,itemName,category,projectName,projectClientNo,projectClientName,
+		startupDate,finishDate,projectState,carMaker,enterpriseSeg,function,model,memo
+		from project;
+	</select>
+	
+	<!-- listAllProject -->
+	<select id="listAllProject" parameterType="map" resultMap="projectResultMap">
+		SELECT *
+		FROM project p
+			LEFT JOIN project_department d ON d.projectID = p.projectID
+			WHERE p.projectState = 1
+			AND (d.departmentID = #{departmentID} OR d.departmentID IS NULL)
+			AND NOT EXISTS (SELECT 1
+			FROM manhour m
+			WHERE p.projectID = m.projectID
+			AND m.staffID = #{staffID}
+			AND m.date > date_add(curdate(),interval - 30 DAY)
+			<!-- AND m.date > date_add(curdate(), interval - 30 DAY) -->
+			)
+		ORDER BY p.category DESC
+		,'--' + p.projectName
+	</select>
+
+	<select id="recentProject" parameterType="map" resultMap="projectResultMap">
+		SELECT
+		*
+		FROM project p
+		INNER JOIN project_department pd ON p.projectID = pd.projectID
+		INNER JOIN manhour m ON p.projectID = m.projectID
+		WHERE p.projectState = 1
+		AND m.date > date_add(curdate(), interval - 30 day)
+		AND m.staffID = #{staffID}
+		AND pd.departmentID = #{departmentID}
+		GROUP BY p.projectid
+	</select>
+
+	<select id="listAllProjectByBranchID" parameterType="map"
+		resultMap="projectResultMap">
+		SELECT *
+		FROM (SELECT p.*
+		FROM project p
+		LEFT JOIN project_department d ON d.projectID = p.projectID
+		WHERE (d.departmentID = #{departmentID} OR d.departmentID IS NULL)
+		AND NOT EXISTS (SELECT 1
+		FROM project_branch pb
+		INNER JOIN branch b ON pb.branchID = b.branchid
+		WHERE p.projectID = pb.projectID
+		AND b.departmentID = #{departmentID}
+		)
+		UNION
+		SELECT p.*
+		FROM project p
+		LEFT JOIN project_branch pb ON pb.projectID = P.projectID
+		WHERE pb.branchID = #{branchID}
+		) t
+		WHERE t.projectState = 1
+		AND NOT EXISTS (SELECT 1
+		FROM manhour m
+		WHERE t.projectID = m.projectID
+		AND m.staffID = #{staffID}
+		AND m.date > date_add(curdate(), interval -30 DAY)
+		)
+		ORDER BY t.category DESC,'--' + t.projectName
+	</select>
+
+	<select id="recentProjectByBranchID" parameterType="map"
+		resultMap="projectResultMap">
+		SELECT *
+		FROM project p
+		INNER JOIN manhour m ON p.projectID = m.projectID
+		WHERE p.projectState = 1
+		AND m.staffID = #{staffID}
+		AND m.date > date_add(curdate(), interval - 30 DAY)
+		AND p.projectID IN ( SELECT pd.projectID
+		FROM project_department pd
+		WHERE pd.departmentID = #{departmentID}
+		AND NOT EXISTS (SELECT 1
+		FROM project_branch pb
+		INNER JOIN branch b on pb.branchID = b.branchID
+		WHERE pd.projectID = pb.projectID
+		AND b.departmentID = #{departmentID}
+		)
+		UNION ALL
+		SELECT projectID
+		FROM project_branch
+		WHERE branchID = #{branchID}
+		)
+		GROUP BY p.projectid
+	</select>
+
+	<!-- 给特殊部门 -->
+	<select id="recentProjectOther" parameterType="int" resultMap="projectResultMap">
+		SELECT *
+		FROM project p
+		INNER JOIN manhour m ON p.projectID = m.projectID
+		WHERE p.projectState = 1
+		AND m.staffID = #{staffID}
+		AND m.date > date_add(curdate(), interval - 30 DAY)
+		GROUP BY p.projectID
+	</select>
+
+	<!-- for what? listOneCategoryProject -->
+	<select id="getProjectByCategory" parameterType="String"
+		resultMap="projectResultMap">
+		select * from project where category =
+		#{category} and projectState = 1 order by '--'+projectName
+	</select>
+
+	<!-- getProjectNameByProjectID -->
+	<select id="getProjectNameByProjectID" parameterType="int"
+		resultType="String">
+		select projectName from project where projectID =
+		#{projectID}
+	</select>
+
+	<!-- insertProject -->
+	<insert id="insertProject" parameterType="Project"
+		useGeneratedKeys="true" keyProperty="projectID">
+		insert into project
+		(category,projectName )values(#{category},#{projectName})
+	</insert>
+
+	<!-- deleteProject -->
+	<insert id="deletePDByProjectID" parameterType="int">
+		delete from project_department where projectID= #{projectID}
+	</insert>
+	
+	<!-- deleteProject -->
+	<insert id="deletePDByProjectIDCT" parameterType="int">
+		delete from project_department_ct where projectID= #{projectID}
+	</insert>
+	
+	<!-- insertPDByProjectID -->
+	<insert id="insertPDByProjectID" parameterType="map"
+		keyProperty="id">
+		insert into project_department (projectID,departmentID)
+		values(#{projectID},#{departmentID});
+	</insert>
+	
+	<!-- insertPDByProjectIDCT -->
+	<insert id="insertPDByProjectIDCT" parameterType="map"
+		keyProperty="id">
+		insert into project_department_ct (projectID,departmentID)
+		values(#{projectID},#{departmentID});
+	</insert>
+	
+	<!-- deleteProject -->
+	<insert id="deleteProBranchByProjectID" parameterType="int">
+		delete from project_branch where projectID= #{projectID}
+	</insert>
+
+	<!-- insertPBByProjectID -->
+	<insert id="insertProBranchByProjectID" parameterType="map"
+		keyProperty="id">
+		insert into project_branch (projectID,branchID)
+		values(#{projectID},#{branchID});
+	</insert>
+
+	<!-- list all task by category and department -->
+	<select id="listTask" parameterType="map" resultType="map">
+		SELECT taskID,task FROM projecttaskview where category = #{category}
+		AND department = #{department} and isVisible = '1'
+	</select>
+
+	<!-- 项目管理 显示所有项目CXEE -->
+	<select id="showAll" parameterType="ProjectReqParam" resultMap="projectShowResultMap">
+		select
+		a.projectID,IFNULL(a.projectName,'') as projectName,a.category,IFNULL(a.projectClientNo,'') as projectClientNo,IFNULL(a.transferNo,'') as transferNo,
+		IFNULL(a.carMaker,'') as carMaker,IFNULL(a.projectClientName,'') as projectClientName,
+		IFNULL(a.projectState,'') as projectState,IFNULL(a.function,'') as function
+		from project_cxee a
+		where a.projectID not in
+		(select projectID from (select projectID from project_cxee
+		where 1=1
+		<if test="category!=null">
+			and category like CONCAT('%','${category}','%' )
+		</if>
+		<if test="projectName!=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientName!=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+		<if test="function!=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectClientNo!=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="transferNo!=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		order by category ,projectID limit #{pageSeq})
+		as t)
+		<if test="category!=null">
+			and category like CONCAT('%','${category}','%' )
+		</if>
+		<if test="projectName!=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientName!=null">
+			and projectClientName like
+			CONCAT('%','${projectClientName}','%')
+		</if>
+		<if test="function!=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectClientNo!=null">
+			and projectClientNo like
+			CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="transferNo!=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		group by projectID
+		order by category,projectID limit #{rp};
+	</select>
+
+	<!-- 项目管理 显示所有项目CT -->
+	<select id="showAllCT" parameterType="ProjectReqParam"
+		resultMap="projectShowResultMapCT">
+		select a.projectID, IFNULL(a.PJNo,'') as PJNo,IFNULL(a.tempPJNo,'') as
+		tempPJNo,IFNULL(a.PJName,'') as PJName,a.category,IFNULL(a.transferNo,'') as
+		transferNo,
+		IFNULL(a.carMaker,'') as carMaker,IFNULL(a.projectState,'') as
+		projectState,IFNULL(a.function,'') as function
+		from project_ct a
+		, project_department_ct b 
+		where  a.projectID = b.projectID
+		<if test="DepartmentFlag != 1">
+			and b.departmentID = #{departmentID}
+		</if>
+        and a.projectID not in
+		(select projectID from (
+				select distinct(a1.projectID) from project_ct a1,project_department_ct b1
+				where 1=1
+				and a1.projectID = b1.projectID
+				<if test="PJName !=null">
+					and a1.PJName like CONCAT('%','${PJName}','%' )
+				</if>
+				<if test="PJNo !=null">
+					and a1.PJNo like CONCAT('%','${PJNo}','%')
+				</if>
+				<if test="tempPJNo !=null">
+					and a1.tempPJNo like CONCAT('%','${tempPJNo}','%')
+				</if>
+				<if test="category !=null">
+					and a1.category like CONCAT('%','${category}','%')
+				</if>
+				<if test="transferNo !=null">
+					and a1.transferNo like CONCAT('%','${transferNo}','%')
+				</if>
+				<if test="carMaker !=null">
+					and a1.carMaker like CONCAT('%','${carMaker}','%')
+				</if>
+				<if test="function !=null">
+					and a1.function like CONCAT('%','${function}','%')
+				</if>
+				<if test="projectState !=null">
+					and a1.projectState like CONCAT('%','${projectState}','%')
+				</if>
+				<if test="DepartmentFlag != 1">
+					and b1.departmentID = #{departmentID}
+				</if>
+				order by a1.category ,a1.projectID limit #{pageSeq})
+				as t)
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		group by projectID
+		order by category,projectID limit #{rp};
+	</select>
+	<select id="showAllCTCXEE" parameterType="ProjectReqParam"
+		resultMap="projectShowResultMapCommon">
+		select projectID, PJNo,tempPJNo, PJName,category,transferNo, carMaker, projectClientNo, projectName, projectClientName, projectState, function
+		from(
+		(select projectID, IFNULL(PJNo,'') as PJNo,IFNULL(tempPJNo,'') as
+		tempPJNo,IFNULL(PJName,'') as PJName,category,IFNULL(transferNo,'') as
+		transferNo,IFNULL(carMaker,'') as carMaker,  IFNULL(projectClientNo,'') as projectClientNo,  
+		IFNULL(projectName,'') as projectName,  IFNULL(projectClientName,'') as projectClientName,  IFNULL(projectState,'') as projectState,
+		IFNULL(function,'') as function
+		from project_cxee
+		where
+		projectID not in
+		(select projectID from (select projectID from project_cxee
+		where 1=1
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+			limit #{pageSeq})
+			as t)
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+		
+		)
+		union all
+		(select projectID, IFNULL(PJNo,'') as PJNo,IFNULL(tempPJNo,'') as
+		tempPJNo,IFNULL(PJName,'') as PJName,category,IFNULL(transferNo,'') as
+		transferNo,IFNULL(carMaker,'') as carMaker,  IFNULL(projectClientNo,'') as projectClientNo,  
+		IFNULL(projectName,'') as projectName,  IFNULL(projectClientName,'') as projectClientName,  IFNULL(projectState,'') as projectState,
+		IFNULL(function,'') as function
+		from project_ct
+		where
+		projectID not in
+		(select projectID from (select projectID from project_ct
+		where 1=1
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+			limit #{pageSeq})
+			as t)
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+		)
+		)totle
+		order by category,projectID limit #{rp}
+	</select>
+	<!-- 项目管理 显示所有项目Common -->
+	<select id="showAllCommon" parameterType="ProjectReqParam" resultMap="projectShowResultMapCommon">
+		select projectID, IFNULL(PJNo,'') as PJNo,IFNULL(tempPJNo,'') as
+		tempPJNo,IFNULL(PJName,'') as PJName,category,IFNULL(transferNo,'') as
+		transferNo,IFNULL(carMaker,'') as carMaker,  IFNULL(projectClientNo,'') as projectClientNo,  
+		IFNULL(projectName,'') as projectName,  IFNULL(projectClientName,'') as projectClientName,  IFNULL(projectState,'') as projectState,
+		IFNULL(function,'') as function
+		from project_cxee
+		where
+		projectID not in
+		(select projectID from (select projectID from project_cxee
+		where 1=1
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+			order by category ,projectID limit #{pageSeq})
+			as t)
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+		order by category,projectID limit #{rp};
+	</select>
+	
+	<!-- 项目管理 显示所有项目CommonCT -->
+	<select id="showAllCommonCT" parameterType="ProjectReqParam" resultMap="projectShowResultMapCommon">
+		select projectID, IFNULL(PJNo,'') as PJNo,IFNULL(tempPJNo,'') as
+		tempPJNo,IFNULL(PJName,'') as PJName,category,IFNULL(transferNo,'') as
+		transferNo,IFNULL(carMaker,'') as carMaker,  IFNULL(projectClientNo,'') as projectClientNo,  
+		IFNULL(projectName,'') as projectName,  IFNULL(projectClientName,'') as projectClientName,  IFNULL(projectState,'') as projectState,
+		IFNULL(function,'') as function
+		from project_ct
+		where
+		projectID not in
+		(select projectID from (select projectID from project_ct
+		where 1=1
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+			order by category ,projectID limit #{pageSeq})
+			as t)
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+		order by category,projectID limit #{rp};
+	</select>
+
+	<select id="showAllForDepartment" parameterType="ProjectReqParam"
+		resultMap="projectShowResultMap">
+		select
+		p.projectID,p.projectName,p.category,p.projectClientNo,p.transferNo,p.carMaker,p.projectClientName,p.projectState,p.function
+		from project_cxee p,project_department_cxee pd,view_department_cxee d
+		where
+		p.projectID=pd.projectID and d.departmentID=pd.departmentID
+		and d.departmentID = #{department}
+		<if test="category!=null">
+			and category like CONCAT('%','${category}','%' )
+		</if>
+		<if test="projectName!=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientName!=null">
+			and projectClientName like
+			CONCAT('%','${projectClientName}','%')
+		</if>
+		<if test="function!=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectClientNo!=null">
+			and projectClientNo like
+			CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="transferNo!=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		group by p.projectID order by p.category ,'--'+p.projectName limit
+		#{rp}
+	</select>
+
+	<select id="showAllForBranch" parameterType="ProjectReqParam"
+		resultMap="projectShowResultMap">
+		select
+		p.projectID,p.projectName,p.category,p.projectClientNo,p.transferNo,p.carMaker,p.projectClientName,p.projectState,p.function
+		from project_cxee p,project_branch pb,view_branch_cxee b
+		where
+		p.projectID=pb.projectID and b.branchID=pb.branchID and p.projectID
+		not in
+		(select projectID from (select p.projectID from project_cxee
+		p,project_branch pb,branch b
+		where p.projectID=pb.projectID and
+		b.branchID=pb.branchID
+		and b.branch like CONCAT('%','${branch}','%')
+		group by p.projectID order
+		by p.category ,'--'+p.projectName limit #{pageSeq}) as t)
+		and b.branch
+		like CONCAT('%','${branch}','%')
+		<if test="category!=null">
+			and category like CONCAT('%','${category}','%' )
+		</if>
+		<if test="projectName!=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientName!=null">
+			and projectClientName like
+			CONCAT('%','${projectClientName}','%')
+		</if>
+		<if test="function!=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectClientNo!=null">
+			and projectClientNo like
+			CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="transferNo!=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		group by p.projectID order by p.category ,'--'+p.projectName limit
+		#{rp}
+	</select>
+
+	<select id="totalPageCount" parameterType="ProjectReqParam"
+		resultType="int">
+		select count(1) from(
+		select a.projectID from project_cxee a
+		where 1=1
+		<if test="category!=null">
+			and category like CONCAT('%','${category}','%' )
+		</if>
+		<if test="projectName!=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientName!=null">
+			and projectClientName like
+			CONCAT('%','${projectClientName}','%')
+		</if>
+		<if test="function!=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectClientNo!=null">
+			and projectClientNo like
+			CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="transferNo!=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		group by projectID) t
+	</select>
+
+	<select id="totalPageCountCT" parameterType="ProjectReqParam" resultType="int">
+		select count(1) from(
+		select distinct(a.projectID) from project_ct a
+		,project_department_ct b 
+		where 1=1
+		and a.projectID = b.projectID
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="DepartmentFlag != 1">
+			and b.departmentID = #{departmentID}
+		</if>
+		group by projectID) t
+	</select>
+	<select id="totalPageCountCTCXEE" parameterType="ProjectReqParam" resultType="int">
+		select count(1) from (
+		(select PJName from project_cxee
+		where 1=1
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+		)
+		union all
+		(select PJName from project_ct
+		where 1=1
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+		)
+		)totle
+	</select>
+	<select id="totalPageCountCommon" parameterType="ProjectReqParam" resultType="int">
+		select count(1) from project_cxee
+		where 1=1
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+	</select>
+	
+	<select id="totalPageCountCommonCT" parameterType="ProjectReqParam" resultType="int">
+		select count(1) from project_ct
+		where 1=1
+		<if test="PJName !=null">
+			and PJName like CONCAT('%','${PJName}','%' )
+		</if>
+		<if test="PJNo !=null">
+			and PJNo like CONCAT('%','${PJNo}','%')
+		</if>
+		<if test="tempPJNo !=null">
+			and tempPJNo like CONCAT('%','${tempPJNo}','%')
+		</if>
+		<if test="category !=null">
+			and category like CONCAT('%','${category}','%')
+		</if>
+		<if test="transferNo !=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		<if test="carMaker !=null">
+			and carMaker like CONCAT('%','${carMaker}','%')
+		</if>
+		<if test="function !=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectState !=null">
+			and projectState like CONCAT('%','${projectState}','%')
+		</if>
+		<if test="projectName !=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientNo !=null">
+			and projectClientNo like CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="projectClientName !=null">
+			and projectClientName like CONCAT('%','${projectClientName}','%')
+		</if>
+	</select>
+
+	<select id="totalPageCountForDepartment" parameterType="ProjectReqParam"
+		resultType="int">
+		select count(1) from project_cxee p,project_department_cxee pd,view_department_cxee d
+		where p.projectID=pd.projectID and d.departmentID=pd.departmentID
+		<if test="category!=null">
+			and p.category like CONCAT('%','${category}','%' )
+		</if>
+		<if test="projectName!=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientName!=null">
+			and projectClientName like
+			CONCAT('%','${projectClientName}','%')
+		</if>
+		<if test="function!=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectClientNo!=null">
+			and projectClientNo like
+			CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="transferNo!=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		and d.departmentID = #{department}
+	</select>
+	<select id="totalPageCountForBranch" parameterType="ProjectReqParam"
+		resultType="int">
+		select count(1) from project_cxee p,project_branch pb,view_branch_cxee b
+		where p.projectID=pb.projectID and b.branchID=pb.branchID
+		<if test="category!=null">
+			and p.category like CONCAT('%','${category}','%' )
+		</if>
+		<if test="projectName!=null">
+			and projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="projectClientName!=null">
+			and projectClientName like
+			CONCAT('%','${projectClientName}','%')
+		</if>
+		<if test="function!=null">
+			and function like CONCAT('%','${function}','%')
+		</if>
+		<if test="projectClientNo!=null">
+			and projectClientNo like
+			CONCAT('%','${projectClientNo}','%')
+		</if>
+		<if test="transferNo!=null">
+			and transferNo like CONCAT('%','${transferNo}','%')
+		</if>
+		and b.branch like CONCAT('%','${branch}','%')
+	</select>
+
+	<select id="getProjectById" parameterType="int"
+		resultMap="projectShowAllResultMap">
+		select *
+		from project where projectID = #{projectID}
+	</select>
+	
+	<select id="getProjectByIdCXEE" parameterType="int"
+		resultMap="projectShowAllResultMap">
+		select *
+		from project_cxee where projectID = #{projectID}
+	</select>
+	
+	<select id="getProjectByIdCT" parameterType="int"
+		resultMap="projectShowAllResultMap">
+		select *
+		from project_ct where projectID = #{projectID}
+	</select>
+
+	<!-- 插入新的项目 -->
+	<insert id="insertNewProject" parameterType="Project" useGeneratedKeys="true" keyProperty="projectID">
+		insert into project
+		(category,directProjectID,projectName,projectClientNo,projectClientName,
+		PJNo,tempPJNo,PJName,itemName,startupDate,finishDate,projectState,carMaker,function,model,transferNo,memo,enterpriseSeg,carMakerID,enterpriseSegID,functionID)
+		values(#{category},#{directProjectID},#{projectName},#{projectClientNo},#{projectClientName},
+		#{PJNo},#{tempPJNo},#{PJName},#{itemName},#{startupDate},#{finishDate},#{projectState},#{carMaker},#{function},#{model},
+		#{transferNo},#{memo},#{enterpriseSeg},#{carMakerID},#{enterpriseSegID},#{functionID})
+	</insert>
+	
+	<!-- 插入新的项目CT -->
+	<insert id="insertNewProjectCT" parameterType="Project" useGeneratedKeys="true" keyProperty="projectID">
+		insert into project
+		(category,directProjectID,projectName,projectClientNo,projectClientName,
+		PJNo,tempPJNo,PJName,itemName,startupDate,finishDate,projectState,carMaker,function,model,transferNo,memo,enterpriseSeg,carMakerID,enterpriseSegID,functionID)
+		values(#{category},#{directProjectID},#{projectName},#{projectClientNo},#{projectClientName},
+		#{PJNo},#{tempPJNo},#{PJName},#{itemName},#{startupDate},#{finishDate},#{projectState},#{carMaker},#{function},#{model},
+		#{transferNo},#{memo},#{enterpriseSeg},#{carMakerID},#{enterpriseSegID},#{functionID})
+	</insert>
+
+	<update id="updateProject" parameterType="Project">
+		update project_cxee set
+		category = #{category},
+		directProjectID = #{directProjectID},
+		projectName = #{projectName},
+		projectClientNo = #{projectClientNo},
+		projectClientName = #{projectClientName},
+		PJNo = #{PJNo},
+		tempPJNo =
+		#{tempPJNo},
+		PJName = #{PJName},
+		itemName = #{itemName},
+		startupDate =
+		#{startupDate},
+		finishDate = #{finishDate},
+		projectState =
+		#{projectState},
+		carMaker = #{carMaker},
+		function = #{function},
+		model =
+		#{model},
+		transferNo = #{transferNo},
+		memo = #{memo}
+		where
+		projectID=#{projectID}
+	</update>
+	
+	<update id="updateProjectCT" parameterType="Project">
+		update project_ct set
+		category = #{category},
+		directProjectID = #{directProjectID},
+		projectName = #{projectName},
+		projectClientNo = #{projectClientNo},
+		projectClientName = #{projectClientName},
+		PJNo = #{PJNo},
+		tempPJNo =
+		#{tempPJNo},
+		PJName = #{PJName},
+		itemName = #{itemName},
+		startupDate =
+		#{startupDate},
+		finishDate = #{finishDate},
+		projectState =
+		#{projectState},
+		carMaker = #{carMaker},
+		function = #{function},
+		model =
+		#{model},
+		transferNo = #{transferNo},
+		memo = #{memo},
+		carMakerID = #{carMakerID},
+		enterpriseSeg = #{enterpriseSeg},
+		enterpriseSegID = #{enterpriseSegID}
+		where
+		projectID=#{projectID}
+	</update>
+
+	<delete id="delectProject">
+		delete from project_cxee where projectID in
+		<foreach collection="array" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="delectProjectCT">
+		delete from project_ct where projectID in
+		<foreach collection="array" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<!-- 调用存储过程存储项目部门信息 -->
+	<!-- 全体部门的项目 -->
+	<update id="callinsertPD" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertPD(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR},
+  			#{departmentID,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 调用存储过程存储项目部门信息 -->
+	<!-- 全体部门的项目 -->
+	<update id="callinsertPDCXEE" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertPDCXEE(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR},
+  			#{departmentID,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 无对应部门的项目 -->
+	<update id="calldeletePD" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call deletePD(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 无对应部门的项目 -->
+	<update id="calldeletePDCXEE" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call deletePDCXEE(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<update id="calldeletePDByProjectID" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call deletePD(
+  			#{project,mode=IN,jdbcType=INT}
+  		)}
+  	]]>
+	</update>
+	<update id="calldeletePB" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call deletePB(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<update id="calldeletePBCXEE" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call deletePBCXEE(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<update id="callinsertProjectBranch" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertProjectBranch(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR},
+  			#{branch,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<update id="callinsertProjectBranchCXEE" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertProjectBranchCXEE(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR},
+  			#{branch,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 电气部门的项目 -->
+	<update id="callinsertDIANQI" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertDIANQI(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 机构部门的项目 -->
+	<update id="callinsertJIGOU" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertJIGOU(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 软件部门的项目 -->
+	<update id="callinsertSoft" parameterType="Map" statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertSoft(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 品证部门的项目 -->
+	<update id="callinsertQuality" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertQuality(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 构想部门的项目 -->
+	<update id="callinsertGOUXIANG" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertGOUXIANG(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 工程设计部门的项目 -->
+	<update id="callinsertGONGCHENG" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertGONGCHENG(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 商品开发室部门的项目 -->
+	<update id="callinsertSHANGPIN" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertSHANGPIN(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 开发管理部门的项目 -->
+	<update id="callinsertKAIFAGUANLI" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertKAIFAGUANLI(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 原价企画部的项目 -->
+	<update id="callinsertYUANJIA" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertYUANJIA(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 设计开发部设计课的项目 -->
+	<update id="callinsertSHEJIKAIFA" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertSHEJIKAIFA(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 设计开发部开发管理课的项目 -->
+	<update id="callinsertSHEJIKAIFAKAIFAGUANLI" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertSHEJIKAIFAKAIFAGUANLI(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 开发统括室的项目 -->
+	<update id="callinsertKAIFATONGKUO" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertKAIFATONGKUO(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<!-- 开发统括室的项目 -->
+	<update id="callinsertCHINAZHIPINKAIFA" parameterType="Map"
+		statementType="CALLABLE">
+  	<![CDATA[
+  		{ call insertCHINAZHIPINKAIFA(
+  			#{project,mode=IN,jdbcType=VARCHAR},
+  			#{category,mode=IN,jdbcType=VARCHAR}
+  		)}
+  	]]>
+	</update>
+	<select id="getProjectDepartmentByProjectID" parameterType="int"
+		resultMap="ProjectForDepartmentResultMap">
+		select pd.departmentID as projectDepartmentID, d.department as
+		projectDepartment from view_department_cxee d,project_department_cxee pd
+		where d.departmentID = pd.departmentID and pd.projectID=#{projectID}
+		and d.deployment=1
+	</select>
+	
+	<select id="getProjectDepartmentByProjectIDCXEE" parameterType="int"
+		resultMap="ProjectForDepartmentResultMap">
+		select pd.departmentID as projectDepartmentID, d.department as
+		projectDepartment from view_department_cxee d,project_department_cxee pd
+		where d.departmentID = pd.departmentID and pd.projectID=#{projectID}
+		and d.deployment=1
+	</select>
+
+	<select id="getProjectBranchByProjectID" parameterType="int"
+		resultMap="ProjectForBranchResultMap">
+		select pd.branchid as projectBranchID, b.branch as projectBranch from view_branch_cxee b,project_branch pd
+		where b.branchID = pd.branchID and pd.projectID=#{projectID}
+	</select>
+	
+	<select id="getProjectDepartmentByProjectIDCT" parameterType="int"
+		resultMap="ProjectForDepartmentResultMap">
+		select pd.departmentID as projectDepartmentID, d.department as
+		projectDepartment from view_department_ct d,project_department_ct pd
+		where d.departmentID = pd.departmentID and pd.projectID=#{projectID}
+		and d.deployment=1
+	</select>
+	
+	<select id="getProjectBranchByProjectIDCT" parameterType="int"
+		resultMap="ProjectForBranchResultMap">
+		select pd.branchid as projectBranchID, b.branch as projectBranch from view_branch_ct b,project_branch pd
+		where b.branchID = pd.branchID and pd.projectID=#{projectID}
+	</select>
+	
+	<!-- 得到所有项目类别 -->
+	<select id="listCategorySelect" resultType="String">
+		select category from project_category
+	</select>
+	<!-- 得到所有项目委托方(从项目委托方表) -->
+	<select id="listProjectClientSelect" resultType="String">
+		select project_client from project_client
+	</select>
+	<!-- 得到所有项目功能（从function_list表） -->
+	<select id="listFunctionListSelect" resultType="String">
+		select functionName from view_functionlist_cxee where functionName is not null
+	</select>
+	<select id="listFunctionListSelectCT" resultType="String">
+		select functionName from view_functionlist_ct where functionName is not null
+	</select>
+
+	<!-- 得到所有开始的项目 -->
+	<select id="listAllStartupProject" parameterType="int"
+		resultMap="projectResultMap">
+		SELECT * FROM project p WHERE p.PROJECTID not in(SELECT projectID FROM
+		manhour where staffID = #{staffID} and
+		date>date_add(curdate(),interval -30 day) and projectState = 1 group
+		by projectid ) and p.projectState = 1 order by category
+		desc,'--'+p.projectName
+
+	</select>
+
+	<!-- 得到部门的开发工数项目 -->
+	<select id="getProjectByDepartment" parameterType="Map"
+		resultMap="projectResultMap">
+		select p.projectID,p.category,p.projectName
+		from department d,project p ,
+		project_department pd
+		where pd.departmentid=d.departmentid and d.departmentid=#{departmentID} and
+		p.projectID = pd.projectID and p.projectState=1 and
+		p.category=#{category}
+		order by '--'+p.projectName
+	</select>
+	<!-- 得到所有开始的项目 -->
+	<select id="listProject" resultMap="projectResultMap">
+		select projectID,category,projectName
+		from project
+		where projectState = 1
+		order by category,'--'+projectName
+	</select>
+	<!-- 列出所有的项目 -->
+	<select id="showAllProject" resultMap="projectResultMap">
+		select * from project order by category,'--'+projectName
+	</select>
+	<select id="getProjectIDByProjectName" parameterType="String"
+		resultType="int">
+		select IFNULL((select projectID from project_cxee where project_cxee.projectName =
+		#{projectName}),0)
+	</select>
+	<select id="getAllProClientName" resultMap="AllProClientName">
+  		select distinct projectClientName from project where projectClientName is not null
+  	</select>
+  	<select id="getAllProFunction" resultMap="AllProFuntion">
+  		select functionName from view_functionlist_cxee where functionName is not null
+  	</select>
+  	<select id="getAllProFunctionCT" resultMap="AllProFuntion">
+  		select functionName from view_functionlist_ct where functionName is not null
+  	</select>
+  	<select id="getAllProCarMaker" resultMap="AllProCarMaker">
+  		select  carmakeID,carmake from view_carmake_list_cxee 
+  	</select>
+  	<select id="getAllProCarMakerCT" resultMap="AllProCarMaker">
+  		select  carmakeID,carmake from view_carmake_list_ct 
+  	</select>
+  	<select id="getAllTransferNo" resultMap="AllTransferNo">
+  		select distinct transferNo from project where transferNo is not null
+  	</select>
+    <select id="getAllStage" resultMap="AllStage">
+  		select categoryID, category ,memo from view_project_category_cxee
+  	</select>
+  	 <select id="getAllCategoryCT" resultMap="AllStage">
+  		select categoryID, category ,memo from view_project_category_ct
+  	</select>
+  	<select id="getAllPJNo" resultMap="projectShowResultMapCT">
+  		select DISTINCT PJNo from project_ct where PJNo is not null
+  	</select>
+  	<select id="getPJName" resultType="Project" >
+  		select DISTINCT PJName from project_ct where PJNo=#{PJNo}
+  	</select>
+  	<select id="getPJNameCXEE" resultType="Project" >
+  		select projectName from project_cxee where PJNo = #{PJNo}
+  	</select>
+  	<select id="getAllTempPJNo" resultMap="projectShowResultMapCT">
+  		select DISTINCT tempPJNo from project_ct where tempPJNo is not null
+  	</select>
+  	<select id="getPJNameByTempPJNo" resultMap="projectShowResultMapCT">
+  		select DISTINCT PJName from project_ct where tempPJNo=#{tempPJNo}
+  	</select>
+  	<select id="getAllBranch" resultType="map">
+  		select branchID ,branch 
+		from view_branch_cxee
+		where branch is not null
+		order by branchID
+  	</select>
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.RegionSumMapper">
+
+ 	<resultMap type="WaterInfo" id="searchListResutMap">
+ 		<result column="RegionID" property="regionID"/>
+ 		<result column="DeviceID" property="deviceID"/>
+ 		<result column="CollectTime" property="collectTime"/>
+ 		<result column="WaterPic" property="waterPic"/>
+ 		<result column="WaterNumber" property="waterNumber"/>
+ 		<result column="IdentifyFlag" property="identifyFlag"/>
+ 		<result column="InsertUser" property="insertUser"/>
+ 		<result column="InsertTime" property="insertTime"/>
+ 		<result column="UpdateUser" property="updateUser"/>
+ 		<result column="UpdateTime" property="updateTime"/>
+ 		<result column="DeviceAddress" property="deviceAddress"/>
+ 	</resultMap>
+ 	
+ 	<select id="searchList" parameterType="RegionSumReqParam" resultMap="searchListResutMap">
+ 		select a.RegionID,a.DeviceID, a.CollectTime,b.RegionSummary,a.WaterNumber,c.DeviceAddress
+			from Tbl_WaterInfo a,Tbl_RegionInfo_Mst b,Tbl_DeviceInfo_Mst c,
+			(select b.DeviceID,MAX(b.CollectTime) as 'CollectTime' from tbl_waterinfo b
+			 group by b.DeviceID) d
+ 			where a.RegionID = b.RegionID 
+			and   a.DeviceID = c.DeviceID
+			and   a.DeviceID = d.DeviceID 
+			and   a.CollectTime = d.CollectTime 
+ 			<if test="regionIdStart !=null and regionIdEnd !=null">
+ 			and a.RegionID between #{regionIdStart} and #{regionIdEnd}
+ 			</if>
+ 			<if test="regionIdStart !=null and regionIdEnd == null">
+ 		 	and a.RegionID &gt;= #{regionIdStart}
+ 			</if>
+ 			<if test="regionIdStart ==null and regionIdEnd != null">
+ 		 	and a.RegionID &lt;= #{regionIdEnd}
+ 			</if>
+ 		group by a.DeviceID
+ 		order by a.RegionID
+ 		limit #{pageSeq},#{rp}
+ 	</select>
+ 	
+ 	<select id="totalPageCount" parameterType="RegionSumReqParam" resultType="int">
+ 		select count(1) from 
+ 			(
+ 				select a.RegionID,a.DeviceID, a.CollectTime,b.RegionSummary,a.WaterNumber,c.DeviceAddress
+					from Tbl_WaterInfo a,Tbl_RegionInfo_Mst b,Tbl_DeviceInfo_Mst c,
+					(select b.DeviceID,MAX(b.CollectTime) as 'CollectTime' from tbl_waterinfo b
+					 group by b.DeviceID) d
+ 					where a.RegionID = b.RegionID 
+					and   a.DeviceID = c.DeviceID
+					and   a.DeviceID = d.DeviceID 
+					and   a.CollectTime = d.CollectTime 
+ 				<if test="regionIdStart !=null and regionIdEnd !=null">
+ 					and a.RegionID between #{regionIdStart} and #{regionIdEnd}
+ 				</if>
+ 				<if test="regionIdStart !=null and regionIdEnd == null">
+ 		 			and a.RegionID &gt;= #{regionIdStart}
+ 				</if>
+ 				<if test="regionIdStart ==null and regionIdEnd != null">
+ 		 			and a.RegionID &lt;= #{regionIdEnd}
+ 				</if>
+ 				group by a.DeviceID
+ 			) c
+ 	</select>
+ 	
+ 	<delete id="deleteByRegionDeviceCollectTime" parameterType="RegionSumReqParam">
+ 		delete from tbl_waterinfo
+		where tbl_waterinfo.RegionID = #{regionID}
+		and tbl_waterinfo.DeviceID= #{deviceID}
+		and tbl_waterinfo.CollectTime=#{collectTime}
+ 	</delete>
+ 	
+ 	 <select id="downloadregionSumShow" parameterType="RegionSumReqParam" resultMap="searchListResutMap">
+ 		select a.RegionID,a.DeviceID, a.CollectTime,b.RegionSummary,a.WaterNumber,c.DeviceAddress
+			from Tbl_WaterInfo a,Tbl_RegionInfo_Mst b,Tbl_DeviceInfo_Mst c,
+			(select b.DeviceID,MAX(b.CollectTime) as 'CollectTime' from tbl_waterinfo b
+			 group by b.DeviceID) d
+ 			where a.RegionID = b.RegionID 
+			and   a.DeviceID = c.DeviceID
+			and   a.DeviceID = d.DeviceID 
+			and   a.CollectTime = d.CollectTime 
+ 		group by a.DeviceID
+ 		order by a.RegionID
+ 	</select>
+</mapper>

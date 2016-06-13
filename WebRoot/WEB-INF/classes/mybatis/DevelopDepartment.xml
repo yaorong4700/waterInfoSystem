@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.DevelopDepartmentMapper">
+ 
+ 	<resultMap type="DevelopDepartment" id="DepartmentResultMap">
+ 		<result column="departmentID" property="departmentID"/>
+ 		<result column="department" property="department"/>
+ 	</resultMap>
+ 	
+ 	<resultMap type="DevelopDepartment" id="DepartmentCategoryResultMap">
+ 		<result column="department_category" property="departmentCategory"/>
+ 	</resultMap>
+ 	<resultMap type="DevelopDepartment" id="searchListResutMap">
+ 		<result column="belong_code" property="belongCode"/>
+ 		<result column="deployment" property="deployment"/>
+ 		<result column="department" property="department"/>
+ 		<result column="branch" property="branch"/>
+ 		<result column="team" property="team"/>
+ 		<result column="department_category" property="departmentCategory"/>
+ 		<result column="memo" property="memo"/>
+ 		<result column="branchID" property="branchID"/>
+ 		<result column="branch_memo" property="branchMemo"/>
+ 		<result column="branch_deployment" property="branchDeployment"/>
+ 	</resultMap>
+ 	
+ 	<select id="getDepartmentList" resultType="map">
+ 		SELECT d.departmentID as "departmentID",d.department as "department" 
+ 		FROM department d
+ 		where department is not null
+ 	</select>
+ 	<select id="getDepartmentListCT" resultType="map">
+ 		SELECT b.departmentID as "departmentID",d.department as "department" 
+ 		FROM branch b
+ 		left join department d on b.departmentID=d.departmentID
+ 		where b.branch_deployment=1
+ 		and b.branch=''
+ 	</select>
+ 	<select id="getDepartmentCategoryList" resultType="map">
+ 		select DISTINCT department_category as "departmentCategory" from department where department_category is not null
+ 	</select>
+ 	<select id="searchList" parameterType="DevelopDepartmentReqParam"	resultMap="searchListResutMap">
+ 		select d.*,b.branch,b.team,b.belong_code,b.branchID,b.branch_memo
+ 		from department d 
+ 		left join branch b on d.departmentID=b.departmentID 
+ 		and b.departmentID in(
+ 			select d.departmentID 
+ 			from department d
+ 			where 1=1 
+ 			<if test="department != null">
+ 			and d.departmentID = #{department}
+ 			</if>
+ 			<if test="departmentCategory != null">
+ 		 	and d.department_category = #{departmentCategory}
+ 			</if>
+ 		)
+ 		where 1=1
+ 		
+ 		<if test="department != null">
+			and d.departmentID = #{department}
+		</if>
+		<if test="departmentCategory != null">
+	 		and d.department_category = #{departmentCategory}
+		</if>
+ 		<if test = "branch != null">
+ 			and b.branchID = #{branch}
+ 		</if>
+ 		order by d.departmentID
+ 		limit #{pageSeq},#{rp}
+ 	</select>
+ 	<select id="searchListBranch" parameterType="DevelopDepartment"	resultMap="searchListResutMap">
+ 		select b.branch,b.team,b.belong_code,b.branchID,b.branch_memo
+ 		from branch b
+ 		where b.departmentID=#{departmentID}
+ 		
+ 		<if test = "branch != null">
+ 			and b.branchID = #{branch}
+ 		</if>
+ 		order by b.branch,b.team
+ 		
+ 	</select>
+ 	
+ 	<select id="getTotalPageCount" resultType="int">
+ 		select count(1)
+ 		from(select d.department 
+ 			from department d 
+ 			left join branch b on d.departmentID=b.departmentID 
+ 			and b.departmentID in(
+ 				select d.departmentID 
+	 			from department d
+	 			where 1=1 
+	 			<if test="department != null">
+	 				and d.departmentID = #{department}
+	 			</if>
+	 			<if test="departmentCategory != null">
+	 		 		and d.department_category = #{departmentCategory}
+ 				</if>
+ 		)
+ 		where 1=1
+ 		<if test="department != null">
+			and d.departmentID = #{department}
+		</if>
+		<if test="departmentCategory != null">
+	 		and d.department_category = #{departmentCategory}
+		</if>
+ 		<if test = "branch != null">
+ 			and b.branchID = #{branch}
+ 		</if>
+ 		)t
+ 	</select>
+ 	<select id="searchListCT" parameterType="DevelopDepartmentReqParam"	resultMap="searchListResutMap">
+ 		select b.*,d.department
+ 		from branch b 
+ 		left join department d on b.departmentID=d.departmentID
+ 		where 1=1
+ 		<if test = "belongCode != null">
+ 			and b.belong_code like concat('%','${belongCode}','%') 
+ 		</if>
+ 		<if test="department != null">
+ 			and b.departmentID = #{department}
+ 		</if>
+ 		<if test = "branch != null">
+ 			and b.branchID = #{branch}
+ 		</if>
+ 		order by b.departmentID,b.branchID
+ 		limit #{pageSeq},#{rp}
+ 	</select>
+ 	<select id="getTotalPageCountCT" resultType="int">
+ 		select count(branchID)
+ 		from branch
+ 		where 1=1
+ 		<if test = "belongCode != null">
+		 	and belong_code like concat('%','${belongCode}','%') 
+		 </if>
+ 		<if test="department != null">
+			and departmentID = #{department}
+		</if>
+ 		<if test = "branch != null">
+ 			and branchID = #{branch}
+ 		</if>
+ 		
+ 	</select>
+ 	
+ 	<insert id="insertNewDepartment" parameterType="DevelopDepartment" useGeneratedKeys="true" keyProperty="departmentID">
+ 		insert into department
+ 		(department,memo,department_category)
+ 		values(#{department},#{memo},#{departmentCategory})
+ 	</insert>
+ 	<insert id="insertNewDepartmentBranch" parameterType="DevelopDepartment" useGeneratedKeys="true" keyProperty="belong_code">
+ 		insert into branch
+ 		(departmentID,branchID,branch,team,belong_code,branch_memo)
+ 		values(#{departmentID},#{branchID},#{branch},#{team},#{belongCode},#{branchMemo})
+ 	</insert>
+ 	<insert id="insertNewDepartmentCT" parameterType="DevelopDepartment" useGeneratedKeys="true" keyProperty="departmentID">
+ 		insert into department
+ 		(departmentID,department) values(#{departmentID},#{department})
+ 	</insert>
+ 	<insert id="insertNewDepartmentBranchCT" parameterType="DevelopDepartment" useGeneratedKeys="true" keyProperty="belong_code">
+ 		insert into branch
+ 		(departmentID,branchID,branch,team,belong_code,branch_memo,branch_deployment)
+ 		values(#{departmentID},#{branchID},#{branch},#{team},#{belongCode},#{branchMemo},#{branchDeployment})
+ 	</insert>
+ 	
+ 	<select id="getMaxBranchID" resultType="int">
+ 		select max(branchID) from branch
+ 	</select>
+ 	<select id="getMaxDepartmentIDCT" resultType="int">
+ 		select max(departmentID) from department
+ 	</select>
+ 	<select id="getMaxDepartmentID" resultType="int">
+ 		select max(departmentID) from department
+ 	</select>
+ 	<select id="getMaxBranchIDCT" resultType="int">
+ 		select max(branchID) from branch
+ 	</select>
+ 	<update id="updateBranchCT" parameterType="DevelopDepartment">
+ 		update branch 
+ 		set
+ 		departmentID = #{departmentID},
+ 		belong_code = #{belongCode},
+ 		team = #{team},
+ 		branch = #{branch},
+ 		branchID = #{branchID},
+ 		branch_memo = #{branchMemo},
+ 		branch_deployment = #{branchDeployment}
+ 		where departmentID = #{departmentIDOld} 
+ 		and branchID = #{branchIDOld} 
+ 		and belong_code = #{belongCodeOld}
+ 	</update>
+ 	
+ 	<update id="updateBranch" parameterType="DevelopDepartment">
+ 		update branch 
+ 		set
+ 		team = #{team},
+ 		branch = #{branch},
+ 		departmentID = #{departmentID},
+ 		branch_memo = #{branchMemo}
+ 		where departmentID = #{departmentIDOld} 
+ 		<if test="branchIDOld!=null">
+ 			and branchID = #{branchIDOld}
+ 		</if> 
+ 		<if test="branchIDOld==null">
+ 			and branch = ''
+ 		</if> 
+ 	</update>
+ 	
+ 	<update id="updateDepartment" parameterType="DevelopDepartment">
+ 		update department 
+ 		set
+ 		department = #{department},
+ 		department_category = #{departmentCategory}
+ 		where departmentID = #{departmentIDOld}
+ 	</update>
+ 	<update id="updateDepartmentCT" parameterType="DevelopDepartment">
+ 		update department 
+ 		set
+ 		department = #{department},
+ 		memo = #{memo},
+ 		deployment = #{deployment}
+ 		where departmentID = #{departmentID}
+ 	</update>
+ 	<delete id="deleteByBelongCode" >
+ 		delete from branch
+ 		where branch.belong_code in
+		<foreach collection="array" index="index" item="belongCode" open="("
+			separator="," close=")">
+			#{belongCode}
+		</foreach>
+ 	</delete>
+ 	<delete id="deleteByBelongCodeDepartmentBranch">
+ 		delete from branch
+ 		where branch.belong_code = #{0}
+ 		and branch.departmentID = #{1}
+ 		and branch.branchID = #{2}
+ 	</delete>
+ 	<delete id="deleteByBelongCodeCT" >
+ 		delete from branch 
+ 		where branch.belong_code in
+		<foreach collection="array" index="index" item="belonCode" open="("
+			separator="," close=")">
+			#{belongCode}
+		</foreach>
+ 	</delete>
+ 	<select id="getBranchID" parameterType="String" resultType="String">
+ 		select branchID from branch 
+ 		where branch = #{branch} 
+ 		limit 1
+ 	</select>
+ 	<select id="getBranchIDCT" parameterType="String" resultType="String">
+ 		select branchID from branch where branch.belong_code = #{belongCode}
+ 	</select>
+ 	<select id="getDepartmentID"  parameterType="String" resultType="String">
+ 		select departmentID from department where department = #{department}
+ 	</select>
+ 	<select id="getDepartmentIDCT"  parameterType="String" resultType="String">
+ 		select departmentID from department where department = #{department}
+ 	</select>
+ 	<select id="getDevelopDepartmentSelected" parameterType="String" resultMap="searchListResutMap">
+ 		select d.department,d.department_category,b.*
+ 		from view_branch_cxee b
+ 		left join view_department_cxee d on b.departmentID=d.departmentID
+ 		where d.departmentID=#{0}
+ 		and b.branchID=#{1}
+ 	</select>
+ 	<select id="getDevelopDepartmentSelectedCT" parameterType="String" resultMap="searchListResutMap">
+ 		select d.department, b.*
+ 		from view_department_ct d,view_branch_ct b
+ 		where d.departmentID=b.departmentID
+ 		and b.belong_code=#{0}
+ 		and d.departmentID=#{1}
+ 		and b.branchID=#{2}
+ 	</select>
+ 	<select id="getDeploymentList" resultType="Integer">
+ 		select distinct d.deployment from department d
+ 	</select>
+ 	<select id="belongCodeExist" parameterType="String" resultType="Integer">
+ 		select count(1) from branch b where b.belong_code = #{belongCode}
+ 	</select>
+ 	<select id="downloadDepartmentShow" resultMap="searchListResutMap">
+ 		select d.*,b.branch,b.team,b.belong_code,b.branchID,b.branch_memo
+ 		from department d 
+ 		left join branch b on d.departmentID=b.departmentID 
+ 		order by d.departmentID
+ 	</select>
+ 	<select id="downloadDepartmentShowCT" resultMap="searchListResutMap">
+ 		select b.*,d.department
+ 		from department d , branch b
+ 		where d.departmentID=b.departmentID
+ 		order by d.departmentID,b.branchID,b.team
+ 	</select>
+ 	
+ 	<select id="getBranchListMap" parameterType="String" resultType="map">
+		select branchID as "branchID",branch as "branch"
+		from branch
+		where
+		departmentID = #{departmentID}
+		group by branch
+		order by branchID
+	</select>
+ 	
+ 	
+	<select id="getBranch" parameterType="String" resultType="String">
+		select branch from branch where branch = #{branchInput} limit 1
+	</select>
+	
+	<select id="getTeam" parameterType="String" resultType="String">
+		select team from branch where team = #{teamInput} limit 1
+	</select>
+	
+	<select id="getTeamListMap" resultType="String">
+		<!-- SELECT team FROM department group by team -->
+		SELECT team FROM branch group by team
+	</select>
+	
+	<select id="getDepartmentIDByBelongCode" resultType="String">
+		select DISTINCT departmentID from branch where branch.belong_code IN 
+		<foreach collection="array" index="index" item="belonCode" open="("
+			separator="," close=")">
+			#{belonCode}
+		</foreach>	
+	</select>
+	<select id="getBranchCount" resultType="int">
+		select count(1) from branch where branch.departmentID=#{departmentID}
+	</select>
+	<delete id="deleteDepartmentByID">
+		delete from department where departmentID=#{departmentID}
+	</delete>
+	<select id="checkBranchExist" resultType="int" parameterType="String">
+		select count(branchID) from branch 
+		where branch=#{branch}
+		and belong_code=#{belongCode}
+		and departmentID in (select departmentID from department where department=#{department})
+	</select>
+	
+	<select id="getBranchIDByBranchCT" resultType="String">
+		select distinct(branchID) from branch where branch=#{branch}
+	</select>
+	<select id="getDepartment" resultType="DevelopDepartment" parameterType="String">
+		select department,departmentID,department_category ,ifnull(memo,'') as branch_memo,'' as branch,'' as team
+		from department 
+		where departmentID=#{departmentID}
+	</select>
+	<select id="checkBranch" parameterType="String" resultType="int">
+		select count(b.belong_code) from branch b
+		where b.departmentID=#{0}
+		and b.branchID=#{1}
+		and b.belong_code=#{2}
+	</select>
+	<delete id="deleteByDepartmentBranch" parameterType="String">
+		delete from branch
+		where departmentID=#{0}
+		and branchID=#{1}
+	</delete>
+	<select id="getBranchCounts" parameterType="String" resultType="int">
+		select count(1) from branch 
+		where departmentID=#{0}
+		and branchID=#{1}
+	</select>
+	<select id="getBranchCountByTeam" parameterType="String" resultType="int">
+		select count(1) from branch
+		where departmentID=#{0}
+		and branchID=#{1}
+		and team=#{2}
+	</select>
+	<update id="updateBranchByTeam" parameterType="DevelopDepartment" >
+		update branch 
+ 		set
+ 		branch_memo = #{branchMemo}
+ 		where departmentID = #{departmentIDOld} 
+ 		and branchID=#{branchIDOld}
+ 		and team=#{team}
+	</update>
+	
+	<select id="getBranchByTeam" parameterType="String" resultType="String">
+		select branchID from branch
+		where branch=#{0}
+		and team=#{1}
+	</select>
+</mapper>

@@ -1,0 +1,1145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.CalendarManhourMapper">
+	<sql id="OutPutManhourColumns">staffID,date,category,projectName,task,taskRate,times</sql>
+
+		<resultMap type="Staff" id="StaffResultMap">
+	    <result column="staffID" property="staffID" />
+		<result column="jobNo" property="jobNo" />
+		<result column="name" property="name" />
+        <result column="gender" property="gender" />
+        <result column="dateGraduation" property="dateGraduation" />
+        <result column="dateIntoCompany" property="dateIntoCompany" />
+        <result column="position" property="position" />
+        <result column="superior" property="superior" />
+        <result column="departmentID" property="departmentID" />
+        <result column="department" property="department" />
+        <result column="branchID" property="branchID" />
+        <result column="branch" property="branch" />
+        <result column="team" property="team" />
+        <result column="email" property="email" />
+        <result column="state" property="state" />
+        <result column="sort" property="sort"/>
+        <result column="role" property="role" />
+        <result column="password" property="password" />
+        <result column="memo" property="memo" />
+        <result column="stateName" property="stateName" />
+        <result column="dateQuitCompany" property="dateQuitCompany" />
+        <result column="comment" property="comment" />
+        <result column="companyName" property="companyName" />
+        <result column="enrolementCode" property="enrolementCode" />
+        <result column="jobCategory" property="jobCategory" />
+        <result column="pmLevel" property="pmLevel" />
+        <result column="designQualified" property="designQualified" />
+        <result column="sortID" property="sortID" />
+        <result column="URKeyCode" property="URKeyCode" />
+	</resultMap>
+	<resultMap type="ManHourDto" id="ManHourDtoResultMap">
+		<result column="id" property="id" />
+		<result column="staffID" property="staffID" />
+		<result column="date" property="date" />
+		<result column="category" property="category" />
+		<result column="projectID" property="projectID" />
+		<result column="taskID" property="taskID" />
+		<result column="task" property="task" />
+		<result column="taskRate" property="taskRate" />
+		<result column="times" property="times" />
+		<result column="memo" property="memo" />
+		<result column="carMaker" property="carMaker" />
+		<result column="projectName" property="projectName" />
+		<result column="componentSortID" property="componentSortID" />
+		<result column="enterpriseSeg" property="enterpriseSeg" />
+		<result column="enterpriseSeg" property="enterpriseSeg" />
+		<result column="componentName" property="componentName" />
+	</resultMap>
+     <resultMap type="Project" id="listProjectResultMap">
+		<id column="projectID" property="projectID" />
+		<result column="category" property="category" />
+		<result column="directProjectID" property="directProjectID" />
+		<result column="projectName" property="projectName"/>
+		<result column="projectClientNo" property="projectClientNo" />
+		<result column="projectClientName" property="projectClientName"/>
+		<result column="carMaker" property="carMaker"/>
+		<result column="function" property="function"/>
+		<result column="model" property="model"/>
+		<result column="transferNo" property="transferNo"/>
+	</resultMap>
+	<resultMap type="Project_task" id="Project_taskResultMap">
+		<result column="taskID" property="taskID" />
+		<result column="category" property="category" />
+		<result column="task" property="task" />
+		<result column="activity" property="activity" />
+		<result column="memo" property="memo" />
+		<result column="department" property="department" />
+	</resultMap>
+	<resultMap type="CsvData" id="CsvDataResultMap">
+		<result column="companyName" property="companyName" />
+		<result column="name" property="name" />
+		<result column="jobNo" property="jobNo" />
+		<result column="enrolementCode" property="enrolementCode" />
+		<result column="department" property="department" />
+		<result column="branch" property="branch" />
+		<result column="position" property="position" />
+		<result column="jobCategory" property="jobCategory" />
+		<result column="sortID" property="sortID" />
+		<result column="sort" property="sort" />
+		<result column="PJNo" property="PJNo" />
+		<result column="PJName" property="PJName" />
+		<result column="tempPJNo" property="tempPJNo" />
+		<result column="transferNo" property="transferNo" />
+		<result column="itemName" property="itemName" />
+		<result column="projectName" property="projectName" />
+		<result column="category" property="category" />
+		<result column="projectClientNo" property="projectClientNo" />
+		<result column="projectClientName" property="projectClientName" />
+		<result column="startupDate" property="startupDate" />
+		<result column="finishDate" property="finishDate" />
+		<result column="projectState" property="projectState" />
+		<result column="carmake" property="carmake" />
+		<result column="functionName" property="functionName" />
+		<result column="model" property="model" />
+		<result column="memo" property="memo" />
+		<result column="enterpriseSeg" property="enterpriseSeg" />
+		<result column="componentID" property="componentID" />
+		<result column="componentName" property="componentName" />
+		<result column="componentSortName" property="componentSortName" />
+		<result column="taskID" property="taskID" />
+		<result column="task" property="task" />
+		<result column="date" property="date" />
+		<result column="times" property="times" />
+	</resultMap>
+	
+	<select id="getTransforNOByDepart"  parameterType="map" resultType="String">
+		SELECT p.transferNo 
+		FROM project_cxee p
+		where p.transferNo is not null and transferNo !=''
+		and p.projectID in(select  m.projectID
+							from manhourview_cxee m
+							WHERE m.departmentID=#{departmentID} 
+							<if test="branchID!=null">
+							and m.branchID= #{branchID}
+	   						</if>
+							and m.date >= #{index}
+        					AND m.date &lt;= #{end} 
+        					order by m.projectID)
+		group by p.transferNo;
+	</select>
+	<select id="getTransforNOByDepart_ct"  parameterType="map" resultType="String">
+		SELECT p.transferNo 
+		FROM project_ct p
+		where p.transferNo is not null and transferNo !=''
+		and p.projectID in(select  m.projectID
+							from manhourview_ct m
+							WHERE m.departmentID=#{departmentID} 
+							<if test="branchID!=null">
+							and m.branchID= #{branchID}
+	   						</if>
+							and m.date >= #{index}
+        					AND m.date &lt;= #{end} 
+        					order by m.projectID)
+		group by p.transferNo;
+	</select>
+	<select id="getProjectDetailByProjectId" parameterType="Integer" resultMap="listProjectResultMap">
+		select projectID,category,projectName,projectClientNo,projectClientName,carMaker,function,model,transferNo  
+        from project_cxee
+		where projectID=#{projectID}; 
+	</select>
+	<select id="getProjectDetailByProjectId_ct" parameterType="Integer" resultMap="listProjectResultMap">
+		select projectID,category,PJName as projectName,projectClientNo,projectClientName,carMaker,function,model,transferNo,enterpriseSeg,PJNo  
+        from project_ct
+		where projectID=#{projectID}; 
+	</select>
+	<select id="getDepartWorkNumProjectId" parameterType="map" resultType="Integer">
+		select distinct m.projectID
+		from manhourview_cxee m
+		WHERE m.departmentID=#{departmentID} 
+		and m.date >= #{index}
+        AND m.date &lt;= #{end} 
+        order by m.projectID;
+	</select>
+	<select id="getDepartWorkNumProjectId_ct" parameterType="map" resultType="Integer">
+		select distinct m.projectID
+		from manhourview_ct m
+		WHERE m.departmentID=#{departmentID} 
+		and m.date >= #{index}
+        AND m.date &lt;= #{end} 
+        order by m.projectID;
+	</select>
+	<select id="getWorkNumProjectId" parameterType="map" resultType="Integer">
+		select distinct m.projectID
+		from manhourview_cxee m
+		WHERE  m.date >= #{index}
+        AND m.date &lt;= #{end} 
+        order by m.projectID;
+	</select>
+	<select id="getDevelopDepartWorkNumProjectId" parameterType="map" resultType="Integer">
+		select distinct m.projectID
+		from manhourview_cxee m
+		WHERE (m.departmentID=#{softDevelopDepart} 
+			or m.departmentID=#{electricDevelopDepart} 
+			or m.departmentID=#{constructDevelopDepart}) 
+		and m.date >= #{index}
+        AND m.date &lt;= #{end} 
+        order by m.projectID;
+	</select>
+	<select id="getNonDevelopDepartWorkNumProjectId" parameterType="map" resultType="Integer">
+		select distinct m.projectID
+		from manhourview_cxee m
+		WHERE  (m.departmentID=#{DevelopUnifiesRoom} 
+			or m.departmentID=#{developQualityAssuranceDepart} 
+			or m.departmentID=#{EngineeringDesignDepart}
+			or m.departmentID=#{OriginalEnterpriseDepart}
+			or m.departmentID=#{IdeaDevelopRoom}
+			or m.departmentID=#{BusinessManageDepart})
+		and m.date >= #{index}
+        AND m.date &lt;= #{end} 
+        order by m.projectID;
+	</select>
+	<select id="getDepartmentDesignStaffNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct m.staffID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE m.departmentID=#{departmentID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+	    and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getDepartmentDesignStaffNum_ct" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct m.staffID
+		from manhourview_ct m left join project_ct p on m.projectID=p.projectID
+		WHERE m.departmentID=#{departmentID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+	    and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getDesignStaffNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct m.staffID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getDevelopDepartDesignStaffNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct m.staffID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE  (m.departmentID=#{softDevelopDepart} 
+			or m.departmentID=#{electricDevelopDepart} 
+			or m.departmentID=#{constructDevelopDepart})
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getNonDevelopDepartDesignStaffNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct m.staffID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE  (m.departmentID=#{DevelopUnifiesRoom} 
+			or m.departmentID=#{developQualityAssuranceDepart} 
+			or m.departmentID=#{EngineeringDesignDepart}
+			or m.departmentID=#{OriginalEnterpriseDepart}
+			or m.departmentID=#{IdeaDevelopRoom}
+			or m.departmentID=#{BusinessManageDepart})
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getStaffIDlist"  parameterType="map" resultMap="staffResultMap">
+	 select 
+   		   s.staffID
+		  ,s.jobNo
+		  ,s.name
+		  ,s.gender
+		  ,s.dateGraduation
+		  ,s.dateIntoCompany
+		  ,s.position
+		  ,s.superior
+		  ,s.team
+		  ,s.email
+		  ,s.state
+		  ,s.sort
+		  ,s.role
+		  ,s.password
+		  ,s.memo
+		 ,t.department,t.branch
+		from staff_cxee s, (
+				<if test="branchID!=null">
+				select distinct m.staffID as staffID ,d.department,b.branch
+		        from manhour_cxee m,view_department_cxee d,view_branch_cxee b
+		        where 
+		        	m.departmentID = d.departmentID
+		            and m.departmentID = b.departmentID
+		            and m.branchID = b.branchID
+					and b.branchID= #{branchID}
+		            AND b.departmentID = #{departmentID}
+		            AND m.date >= #{index}
+		            AND m.date &lt;= #{end} 
+			    </if>
+				<if test="branchID==null">
+				select distinct m.staffID as staffID ,d.department,b.branch
+		        from manhour_cxee m,view_department_cxee d,view_branch_cxee b
+		        where 
+		            m.departmentID = d.departmentID
+		            AND d.departmentID = #{departmentID}
+		            and m.departmentID = b.departmentID
+		            and m.branchID = b.branchID
+		            AND m.date >= #{index}
+		            AND m.date &lt;= #{end} 
+		        union all
+		          select distinct m.staffID as staffID,d.department, "" as branch
+			        from manhour_cxee m,view_department_cxee d
+			        where  
+			        	m.departmentID = d.departmentID
+			    	 AND d.departmentID = #{departmentID}
+			     	and (m.branchid is null or m.branchID = 0)
+			     	AND m.date >= #{index}
+		            AND m.date &lt;= #{end} 
+			    </if>
+ 
+		       ) t
+		where s.staffid = t.staffid
+		order by s.staffid
+	</select>
+	<select id="getStaffIDlist_ct"  parameterType="map" resultMap="staffResultMap">
+	 select 
+   		   s.staffID
+		  ,s.jobNo
+		  ,s.name
+		  ,s.gender
+		  ,s.dateGraduation
+		  ,s.dateIntoCompany
+		  ,s.position
+		  ,s.superior
+		  ,s.team
+		  ,s.email
+		  ,s.state
+		  ,s.sort
+		  ,s.role
+		  ,s.password
+		  ,s.memo
+		 ,t.department,t.branch
+		from staff_ct s, (
+				<if test="branchID!=null">
+				select distinct m.staffID as staffID ,d.department,b.branch
+		        from manhour_ct m,view_department_ct d,view_branch_ct b
+		        where 
+		        	m.departmentID = d.departmentID
+		            and m.departmentID = b.departmentID
+		            and m.branchID = b.branchID
+					and b.branchID= #{branchID}
+		            AND b.departmentID = #{departmentID}
+		            AND m.date >= #{index}
+		            AND m.date &lt;= #{end} 
+			    </if>
+				<if test="branchID==null">
+				select distinct m.staffID as staffID ,d.department,b.branch
+		        from manhour_ct m,view_department_ct d,view_branch_ct b
+		        where 
+		            m.departmentID = d.departmentID
+		            AND d.departmentID = #{departmentID}
+		            and m.departmentID = b.departmentID
+		            and m.branchID = b.branchID
+		            AND m.date >= #{index}
+		            AND m.date &lt;= #{end} 
+		        union all
+		          select distinct m.staffID as staffID,d.department, "" as branch
+			        from manhour_ct m,view_department_ct d
+			        where  
+			        	m.departmentID = d.departmentID
+			    	 AND d.departmentID = #{departmentID}
+			     	and (m.branchid is null or m.branchID = 0)
+			     	AND m.date >= #{index}
+		            AND m.date &lt;= #{end} 
+			    </if>
+ 
+		       ) t
+		where s.staffid = t.staffid
+		order by s.staffid
+	</select>
+	<select id="getStaffdetail"  parameterType="Integer" resultMap="staffResultMap">
+	    SELECT *
+        FROM  staff_cxee
+        where staffID=#{staffID};
+	</select>
+	<select id="getCompanyAssumePJName" parameterType="map" resultType="String">
+		select distinct p.projectName
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE p.projectClientName=#{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}
+        order by p.projectID;
+	</select>
+	<select id="getDevelopDepartAssumePJName" parameterType="map" resultType="String">
+		select distinct p.projectName
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE (m.departmentID=#{softDevelopDepart} 
+			or m.departmentID=#{electricDevelopDepart} 
+			or m.departmentID=#{constructDevelopDepart})
+		and p.projectClientName=#{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}
+        order by p.projectID;
+	</select>
+	<select id="getNonDevelopDepartAssumePJName" parameterType="map" resultType="String">
+		select distinct p.projectName
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE (m.departmentID=#{DevelopUnifiesRoom} 
+			or m.departmentID=#{developQualityAssuranceDepart} 
+			or m.departmentID=#{EngineeringDesignDepart}
+			or m.departmentID=#{OriginalEnterpriseDepart}
+			or m.departmentID=#{IdeaDevelopRoom}
+			or m.departmentID=#{BusinessManageDepart})
+		and p.projectClientName=#{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}
+        order by p.projectID;
+	</select>
+	<select id="getCompanyAssumePJNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct p.projectID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE p.projectClientName=#{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getDevelopDepartAssumePJNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct p.projectID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE (m.departmentID=#{softDevelopDepart} 
+			or m.departmentID=#{electricDevelopDepart} 
+			or m.departmentID=#{constructDevelopDepart})
+		and p.projectClientName=#{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getNonDevelopDepartAssumePJNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct p.projectID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE (m.departmentID=#{DevelopUnifiesRoom} 
+			or m.departmentID=#{developQualityAssuranceDepart} 
+			or m.departmentID=#{EngineeringDesignDepart}
+			or m.departmentID=#{OriginalEnterpriseDepart}
+			or m.departmentID=#{IdeaDevelopRoom}
+			or m.departmentID=#{BusinessManageDepart})
+		and p.projectClientName=#{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getAssumePJName" parameterType="map" resultType="String">
+		select distinct p.projectName
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE p.projectClientName=#{projectClientName}
+		and m.departmentID=#{departmentID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}
+        order by p.projectID;
+	</select>
+	<select id="getAssumePJName_ct" parameterType="map" resultType="String">
+		select distinct p.projectName
+		from manhourview_ct m left join project_ct p on m.projectID=p.projectID
+		WHERE m.departmentID=#{departmentID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}
+        order by p.projectID;
+	</select>
+	<select id="getAssumePJNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct p.projectID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE p.projectClientName=#{projectClientName}
+		and m.departmentID=#{departmentID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getAssumePJNum_ct" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct p.projectID
+		from manhourview_ct m left join project_ct p on m.projectID=p.projectID
+		WHERE m.departmentID=#{departmentID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getPersonAssumePJName" parameterType="map" resultType="String">
+		select distinct p.projectName
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE p.projectClientName=#{projectClientName}
+		and m.departmentID=#{departmentID}
+		and m.staffID= #{staffID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}
+        order by p.projectID;
+	</select>
+	<select id="getPersonAssumePJName_ct" parameterType="map" resultType="String">
+		select distinct p.pjName
+		from manhourview_ct m left join project_ct p on m.projectID=p.projectID
+		WHERE m.departmentID=#{departmentID}
+		and m.staffID= #{staffID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}
+        order by p.projectID;
+	</select>
+	<select id="getPersonAssumePJNum" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct p.projectID
+		from manhourview_cxee m left join project_cxee p on m.projectID=p.projectID
+		WHERE p.projectClientName=#{projectClientName}
+		and m.departmentID=#{departmentID}
+		and m.staffID= #{staffID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getPersonAssumePJNum_ct" parameterType="map" resultType="Integer">
+		select count(1) from (select distinct p.projectID
+		from manhourview_ct m left join project_ct p on m.projectID=p.projectID
+		WHERE m.departmentID=#{departmentID}
+		and m.staffID= #{staffID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end}) T ;
+	</select>
+	<select id="getWorkDays" parameterType="map" resultType="Integer">
+		select count(1) 
+		from work_calendar 
+		where able=1 
+		and date >= #{index}
+        AND date &lt;= #{end};
+	</select>
+	<!-- 取出所有的Task-->
+	<select id="listCompanyProjectTasks" resultMap="Project_taskResultMap">
+		select *
+		from projecttaskview_cxee;
+	</select>
+	<select id="listDevelopDepartProjectTasks" parameterType="map" resultMap="Project_taskResultMap">
+		select *
+		from projecttaskview_cxee
+		where (departmentID=#{softDevelopDepart} 
+			or departmentID=#{electricDevelopDepart} 
+			or departmentID=#{constructDevelopDepart});
+	</select>
+	<select id="listNonDevelopDepartProjectTasks" parameterType="map" resultMap="Project_taskResultMap">
+		select *
+		from projecttaskview_cxee
+		where (departmentID=#{DevelopUnifiesRoom} 
+			or departmentID=#{developQualityAssuranceDepart} 
+			or departmentID=#{EngineeringDesignDepart}
+			or departmentID=#{OriginalEnterpriseDepart}
+			or departmentID=#{IdeaDevelopRoom}
+			or departmentID=#{BusinessManageDepart});
+	</select>
+	<!-- 根据部门名取出相应的Task-->
+	<select id="listDepartProjectTask" parameterType="String" resultMap="Project_taskResultMap">
+		select *
+		from projecttaskview_cxee
+		where departmentID=#{departmentID};
+	</select>
+	<select id="listDepartProjectTask_ct" parameterType="String" resultMap="Project_taskResultMap">
+		select *
+		from projecttaskview_ct
+		where departmentID=#{departmentID};
+	</select>
+	<select id="listOutPutStaff" parameterType="map" resultMap="StaffResultMap">
+		select *
+		from staffview_cxee
+		where department=#{departFirst} or department=#{departSecond} or department=#{departThird};
+	</select>
+	<!-- 根据特殊的三个有先行开发的部门选择他们在项目表中的特有ID号-->
+	<select id="SearchId" parameterType="String" resultType="Integer">
+		select projectID
+		from project_cxee
+		<!-- where projectName=#{Parma.strInAdvanceDepart[i]};-->
+		where projectName=#{string};
+	</select>
+	<!-- 取出委托方为CT或者DCOE的开发工数（开发）、开发工数（附带）的总值-->
+	<!-- IFNULL(sum(m.times),0) 如果为null则设置成0,放置出现nullpoint -->
+	<select id="listCTDCOEDevelopWorkNum" parameterType="map" resultType="Double">
+		select IFNULL(sum(m.times),0)
+		from manhourview_cxee m,project_cxee p
+		where p.projectID = m.projectID 
+		and m.taskmemo=#{memo} 
+		and m.category='开发工数' 
+		and p.projectClientName = #{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select>
+	<!-- 取出开发部门委托方为CT、DCOE、OUTOUT的开发工数（开发）、开发工数（附带）的总值-->
+	<!-- IFNULL(sum(m.times),0) 如果为null则设置成0,放置出现nullpoint -->
+	<select id="listCTDCOEDevelopDepartWorkNum" parameterType="map" resultType="Double">
+		select IFNULL(sum(m.times),0)
+		from manhourview_cxee m,project_cxee p
+		where (m.departmentID=#{softDevelopDepart} 
+			or m.departmentID=#{electricDevelopDepart} 
+			or m.departmentID=#{constructDevelopDepart})
+		and p.projectID = m.projectID 
+		and m.taskmemo=#{memo} 
+		and m.category='开发工数' 
+		and p.projectClientName = #{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select>
+	<!-- 取出开发部门以外的委托方为CT、DCOE、OUTOUT的开发工数（开发）、开发工数（附带）的总值-->
+	<!-- IFNULL(sum(m.times),0) 如果为null则设置成0,放置出现nullpoint -->
+	<select id="listCTDCOENonDevelopDeparWorkNum" parameterType="map" resultType="Double">
+		select IFNULL(sum(m.times),0)
+		from manhourview_cxee m,project_cxee p
+		where (m.departmentID=#{DevelopUnifiesRoom} 
+			or m.departmentID=#{developQualityAssuranceDepart} 
+			or m.departmentID=#{EngineeringDesignDepart}
+			or m.departmentID=#{OriginalEnterpriseDepart}
+			or m.departmentID=#{IdeaDevelopRoom}
+			or m.departmentID=#{BusinessManageDepart})
+		and p.projectID = m.projectID 
+		and m.taskmemo=#{memo} 
+		and m.category='开发工数' 
+		and p.projectClientName = #{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select>
+	<!-- IFNULL(sum(m.times),0) 如果为null则设置成0,防止出现nullpoint -->
+	<select id="listCategoryDetail" parameterType="map" resultType="Double">
+		select IFNULL(sum(m.times),0)
+        from manhourview_cxee m,
+		project p
+		where p.projectID = m.projectID 
+		and m.category='开发工数' 
+		and p.function=#{function}
+		and m.departmentID=#{departmentID}
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and p.projectClientName = #{projectClientName}
+		and m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select>
+	<!-- IFNULL(sum(m.times),0) 如果为null则设置成0,防止出现nullpoint -->
+	<select id="listPersonCategoryDetail" parameterType="map" resultType="Double">
+		select IFNULL(sum(m.times),0)
+        from manhourview_cxee m,project_cxee p
+		where  p.projectID = m.projectID 
+		and m.staffID = #{staffID}
+        and m.category='开发工数'
+		and p.projectClientName = #{projectClientName}
+		and p.function=#{function}
+		and m.departmentID= #{departmentID} 
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+	    </if>
+		and m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select> 
+	<!-- 取出公司所有的正在运行的项目-->
+	<select id="listComapnyProject"  resultMap="listProjectResultMap">
+		select projectID,category,projectName,projectClientNo,projectClientName,carMaker,function,model,transferNo  
+        from project_cxee; 
+	</select>
+	<!-- 取出公司所有的员工-->
+	<select id="listCompanyStaffs"  resultMap="StaffResultMap">
+		select *
+		from staffview_cxee;
+	</select>
+	<!-- 取出本部门相关的项目-->
+	<select id="listProject"  parameterType="String" resultMap="listProjectResultMap">
+        select p.projectID,p.category,p.projectName,p.projectClientNo,p.projectClientName,p.carMaker,p.function,p.model,p.transferNo 
+        from view_department_cxee d,project_cxee p , project_department_cxee pd 
+        where pd.departmentid=d.departmentid 
+        and d.department=#{department}
+        and p.projectID = pd.projectID 
+        <!--  and p.projectState=1-->
+        order by p.category,'--'+p.projectName;
+	</select>
+
+    <select id="listAllDepart" resultType="map">
+		SELECT departmentID, department FROM view_department_cxee;
+	</select>
+	
+    <select id="listAllDepart_ForCt" resultType="map">
+		SELECT d.departmentID as "departmentID",d.department as "department" 
+		FROM view_branch_ct b
+		left join view_department_ct d on  b.departmentID=d.departmentID
+		where b.branch_deployment=1
+		and b.branch=''
+	</select>
+	
+	<!-- 取出公司级开发工数（开发）与开发工数（附带）的值-->
+	<select id="listDevelopWorkNum" parameterType="map" resultType="Double">
+		select IFNULL(sum(m.times),0)
+		from manhourview_cxee m
+		where m.category='开发工数' 
+		and m.taskmemo=#{memo}
+		and m.date >= #{index}
+        and m.date &lt;= #{end};
+	</select>
+	<!-- 取出开发部门开发工数（开发）与开发工数（附带）的值-->
+	<select id="listdevelopDepartmentWorkNum" parameterType="map" resultType="Double">
+		select IFNULL(sum(m.times),0)
+		from manhourview_cxee m
+		where (m.departmentID=#{softDevelopDepart} 
+			or m.departmentID=#{electricDevelopDepart} 
+			or m.departmentID=#{constructDevelopDepart})
+		and m.category='开发工数' 
+		and m.taskmemo=#{memo}
+		and m.date >= #{index}
+        and m.date &lt;= #{end};
+	</select>
+	<!-- 取出开发部门以外的开发工数（开发）与开发工数（附带）的值-->
+	<select id="listNonDevelopDepartmentWorkNum" parameterType="map" resultType="Double">
+		select IFNULL(sum(m.times),0)
+		from manhourview_cxee m
+		where (m.departmentID=#{DevelopUnifiesRoom} 
+			or m.departmentID=#{developQualityAssuranceDepart} 
+			or m.departmentID=#{EngineeringDesignDepart}
+			or m.departmentID=#{OriginalEnterpriseDepart}
+			or m.departmentID=#{IdeaDevelopRoom}
+			or m.departmentID=#{BusinessManageDepart})
+		and m.category='开发工数' 
+		and m.taskmemo=#{memo}
+		and m.date >= #{index}
+        and m.date &lt;= #{end};
+	</select>
+	<!-- 根据manhour的departmentID和branchID取某部门的工数或许更加可靠:） -->
+	<!-- <select id="listDepartManhourDtoTotal" parameterType="map" resultMap="ManHourDtoResultMap">
+		select m.id as id,m.staffID as staffID,m.date as date,m.category as category,
+		m.projectID as projectID,p.projectName as projectName,p.carMaker as carMaker,pt.task as task,m.taskRate as taskRate,
+		m.times as times,m.memo as memo
+        from manhour_cxee m,view_department_cxee d,project_cxee p,project_task_cxee pt
+        where m.projectID=p.projectID
+        and m.taskID=pt.taskID
+        <if test="branch!=null">
+           and m.branchID = d.departmentID
+			and d.branch= #{branch}
+			AND d.department = #{department}
+	    </if>
+	    <if test="branch==null">
+	       and  m.departmentID = d.departmentID
+			AND d.department = #{department}
+	    </if>
+        AND m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select> -->
+	<select id="listDepartManhourDtoTotal" parameterType="map" resultMap="ManHourDtoResultMap">
+		select m.id as id,m.staffID as staffID,m.date as date,m.category as category,
+		m.projectID as projectID,p.projectName as projectName,p.carMaker as carMaker,m.taskID as taskID,m.task as task,m.taskRate as taskRate,
+		m.times as times,m.memo as memo
+        from manhourview_cxee m,project_cxee p
+        where m.projectID=p.projectID
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+			AND m.departmentID = #{departmentID}
+	    </if>
+	    <if test="branchID==null">
+			AND m.departmentID = #{departmentID}
+	    </if>
+        AND m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select>
+	<select id="listDepartManhourDtoTotal_ct" parameterType="map" resultMap="ManHourDtoResultMap">
+		select m.id as id,m.staffID as staffID,m.date as date,m.category as category,
+		m.projectID as projectID,p.PJName as projectName,p.carMaker as carMaker,m.taskID as taskID,m.task as task,m.taskRate as taskRate,
+		m.times as times,m.memo as memo,cs.componentSortID as componentSortID,p.enterpriseSeg as enterpriseSeg,c.componentID as componentID,c.componentName as componentName
+        from manhour_ct m
+		      left join component c on m.componentid = c.id
+		      left join component_sort cs on c.componentSortID = cs.componentSortID
+             ,project_ct p
+        where m.projectID=p.projectID
+		<if test="branchID!=null">
+			and m.branchID= #{branchID}
+			AND m.departmentID = #{departmentID}
+	    </if>
+	    <if test="branchID==null">
+			AND m.departmentID = #{departmentID}
+	    </if>
+        AND m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select>
+	<select id="listPersonManhourDtoTotal" parameterType="map" resultMap="ManHourDtoResultMap">
+		select m.id as id,m.staffID as staffID,m.date as date,m.category as category,
+		m.projectID as projectID,p.projectName as projectName,p.carMaker as carMaker,m.taskID as taskID ,m.task as task,m.taskRate as taskRate,
+		m.times as times,m.memo as memo
+        from manhour_cxee m
+             ,view_department_cxee d,project_cxee p,view_branch_cxee b
+        where m.projectID=p.projectID
+        <!-- and m.taskID=pt.taskID -->
+		<if test="branchID!=null">
+		   and  m.departmentID = d.departmentID
+		   and  m.departmentID = b.departmentID
+	       and  m.branchID = b.branchID
+			AND b.branchID = #{branchID}
+			AND b.departmentID =#{departmentID}
+	    </if>
+	    <if test="branchID==null">
+	       and  m.departmentID = d.departmentID
+	       and  m.branchID = b.branchID
+	       and  b.departmentID = d.departmentID
+			AND d.departmentID = #{departmentID}
+	    </if>
+		and m.staffID=#{staffID}
+        AND m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select>
+	<select id="listPersonManhourDtoTotal_ct" parameterType="map" resultMap="ManHourDtoResultMap">
+		select m.id as id,m.staffID as staffID,m.date as date,m.category as category,
+		m.projectID as projectID,p.PJName as projectName,p.carMaker as carMaker,m.taskID as taskID ,m.task as task,m.taskRate as taskRate,
+		m.times as times,m.memo as memo,cs.componentSortID as componentSortID,p.enterpriseSeg as enterpriseSeg,c.componentID as componentID,c.componentName as componentName
+        from manhour_ct m
+		      left join component c on m.componentid = c.id
+		      left join component_sort cs on c.componentSortID = cs.componentSortID
+             ,view_department_ct d,project_ct p,view_branch_ct b
+        where m.projectID=p.projectID
+        <!-- and m.taskID=pt.taskID -->
+		<if test="branchID!=null">
+		   and  m.departmentID = d.departmentID
+		   and  m.departmentID = b.departmentID
+	       and  m.branchID = b.branchID
+			AND b.branchID = #{branchID}
+			AND b.departmentID =#{departmentID}
+	    </if>
+	    <if test="branchID==null">
+	       and  m.departmentID = d.departmentID
+	       and  m.branchID = b.branchID
+	       and  b.departmentID = d.departmentID
+			AND d.departmentID = #{departmentID}
+	    </if>
+		and m.staffID=#{staffID}
+        AND m.date >= #{index}
+        AND m.date &lt;= #{end};
+	</select>
+	<!-- 取出本月公司的工数-->
+	<select id="listCompanyManhourDtoTotal" parameterType="map" resultMap="ManHourDtoResultMap">
+		select m.category,p.projectID,m.taskID as taskID,m.task,sum(m.times) as times,p.projectName,p.carMaker
+		from manhourview_cxee m,staffview_cxee s ,project_cxee p
+		where m.staffID=s.staffID  
+		and p.projectID = m.projectID
+		and m.date >= #{index} 
+		and m.date &lt;= #{end}
+		group by m.category,p.projectName ,m.task
+		limit 1000000000;
+	</select>
+	<!-- 取出本月开发部门的工数-->
+	<select id="listDevelopDepartManhourDtoTotal" parameterType="map" resultMap="ManHourDtoResultMap">
+		select m.category,p.projectID,m.taskID as taskID,m.task,sum(m.times) as times,p.projectName,p.carMaker
+		from manhourview_cxee m,staffview_cxee s ,project_cxee p
+		where (m.departmentID=#{softDevelopDepart} 
+			or m.departmentID=#{electricDevelopDepart} 
+			or m.departmentID=#{constructDevelopDepart})
+		and m.staffID=s.staffID  
+		and p.projectID = m.projectID
+		and m.date >= #{index} 
+		and m.date &lt;= #{end}
+		group by m.category,p.projectName ,m.task
+		limit 1000000000;
+	</select>
+
+    <!-- 取出本月开发以外部门的工数-->
+    <select id="listNonDevelopDepartManhourDtoTotal" parameterType="map" resultMap="ManHourDtoResultMap">
+        select m.category,p.projectID,m.taskID as taskID,m.task,sum(m.times) as times,p.projectName,p.carMaker
+        from manhourview_cxee m,staffview_cxee s ,project_cxee p
+        where (m.departmentID=#{DevelopUnifiesRoom}
+            or m.departmentID=#{developQualityAssuranceDepart}
+            or m.departmentID=#{EngineeringDesignDepart}
+            or m.departmentID=#{OriginalEnterpriseDepart}
+            or m.departmentID=#{IdeaDevelopRoom}
+            or m.departmentID=#{BusinessManageDepart})
+        and m.staffID=s.staffID
+        and p.projectID = m.projectID
+        and m.date >= #{index}
+        and m.date &lt;= #{end}
+        group by m.category,p.projectName ,m.task
+        limit 1000000000;
+    </select>
+
+    <select id="listbranchselect" parameterType="String" resultType="map">
+        select branchID,
+        	   branch
+         from view_branch_cxee
+         where departmentID = #{departmentID}
+         group by branch
+         order by branchID;
+    </select>
+
+    <select id="listbranchselect_ForCt" parameterType="String" resultType="map">
+        select branchID,
+        	   branch
+          from view_branch_ct
+         where departmentID = #{departmentID}
+         group by branch
+         order by branchID;
+    </select>
+
+    <!-- 根据课名得到课内员工名字 -->
+    <select id="liststaffselect" parameterType="map" resultType="String">
+        select name
+          from staffview_cxee
+         where branchID = #{branchID}
+         union
+        select s.name as name
+          from manhourview_cxee m
+         inner join staffview_cxee s on m.staffid = s.staffid
+         where m.branchID = #{branchID}
+           <if test="startDate!=null">
+              <if test="endDate!=null">
+           and m.date between #{startDate} and #{endDate}
+              </if>
+           </if>
+        ;
+    </select>
+
+    <select id="listCompanystaffselect" parameterType="map" resultType="String">
+        select name
+          from staffview_cxee
+         where departmentID = #{departmentID}
+         union
+        select s.name as name
+          from manhourview_cxee m
+         inner join staffview_cxee s on m.staffid = s.staffid
+         where m.departmentID = #{departmentID}
+           <if test="startDate!=null">
+              <if test="endDate!=null">
+            and m.date between #{startDate} and #{endDate}
+              </if>
+           </if>
+        ;
+    </select>
+
+    <select id="listBranchManhourDtoTotal" parameterType="map" resultMap="ManHourDtoResultMap">
+        select m.id as id,m.staffID as staffID,m.date as date,m.category as category,
+        p.projectID as projectID,p.projectName as projectName,m.taskID as taskID,m.task as task,m.taskRate as taskRate,
+        m.times as times,m.memo as memo
+        from manhour_cxee m,project_cxee p, staffview_cxee s
+        where m.projectID = p.projectID
+        AND m.staffID = s.staffID
+        AND s.department = #{department}
+        AND s.branch = #{branch}
+        AND m.date >= #{index}
+        AND m.date &lt;= #{end};
+    </select>
+
+	<select id="Branchtotalmanhour" parameterType="map" resultType="Float">
+		select sum(m.times) 
+        from manhour_cxee m,staffview_cxee s
+        where m.projectID  in (
+                         select p.projectID 
+                         from project_cxee p 
+                         where p.projectClientName=#{string1} 
+                         and p.function=#{string2} )
+         and m.date >= #{index}
+         and m.date &lt;= #{end}
+         and s.staffID=m.staffID 
+         and s.branch=#{branch}
+         and s.department=#{department};
+	</select>
+	
+	<select id="Branchtotaltwothreefourmanhour" parameterType="map" resultType="Float">
+		select sum(times) 
+		from staffview_cxee s,manhour_cxee m 
+		where s.staffID=m.staffID 
+		and s.department=#{department} 
+		and s.branch=#{branch} 
+		and m.category=#{string3} 
+		and m.date >= #{index} 
+		and m.date &lt;= #{end}
+		group by category;
+	</select>
+	
+	<update id="UpdateEndtime" parameterType="String" >
+		update deadline set
+		deadline = #{endtime}
+	</update>
+	<select id="getdeadlinetime"  resultType="Date">
+		select deadline
+		from deadline
+		where deadline is not null;
+	</select>
+	<select id="listtransferNo"  resultType="String">
+		SELECT transferNo 
+		FROM project_cxee 
+		where transferNo is not null and transferNo !=''
+		group by transferNo;
+	</select>
+	<select id="listDepartmenttransferNo"  parameterType="String" resultType="String">
+		SELECT p.transferNo 
+		FROM project_cxee p,project_department_cxee pd,view_department_cxee d
+		where p.transferNo is not null 
+		and p.transferNo !=''
+		and p.projectID=pd.projectID
+		and pd.departmentID=d.departmentID
+		and d.department=#{department}
+		group by p.transferNo;
+	</select>
+	<select id="listDepartment" resultType="com.clarion.worksys.entity.departmentBranch">
+		SELECT departmentID, department FROM view_department_cxee;
+	</select>
+	<select id="listDepartmentCT" resultType="com.clarion.worksys.entity.departmentBranch">
+		SELECT d.departmentID as "departmentID",d.department as "department" 
+		FROM view_branch_ct b
+		left join view_department_ct d on  b.departmentID=d.departmentID
+		where b.branch_deployment=1
+		and b.branch=''
+	</select>
+	<select id="branchSelect" resultType="com.clarion.worksys.entity.departmentBranch">
+		select branchID,
+        	   branch
+          from view_branch_cxee
+         where departmentID = #{departmentID}
+         group by branch
+         order by branchID;
+	</select>
+	<select id="branchSelectCT" resultType="com.clarion.worksys.entity.departmentBranch">
+		select branchID,
+        	   branch
+          from view_branch_ct
+         where departmentID = #{departmentID}
+         group by branch
+         order by branchID;
+	</select>
+	<select id="getCxeeCsvData" parameterType="map" resultMap="CsvDataResultMap">
+		select distinct
+			s.staffID
+			,m.projectID
+			,IFNULL(s.companyName,'') as companyName
+			,s.name as name
+			,s.jobNo as jobNo
+			,IFNULL(s.enrolementCode,'') as enrolementCode
+			,m.departmentID
+			,m.branchID
+			,d.department as department
+			,IFNULL(b.branch,'') as branch
+			,IFNULL(p.position,'') as position
+			,IFNULL(s.jobCategory,'') as jobCategory
+			,IFNULL(s.sortID,'') as sortID
+			,IFNULL(s.sort,'') as sort
+			,IFNULL(pj.PJNo,'') as PJNo
+			,IFNULL(pj.PJName,'') as PJName
+			,IFNULL(pj.tempPJNo,'') as tempPJNo
+			,IFNULL(pj.transferNo,'') as transferNo
+			,IFNULL(pj.itemName,'') as itemName
+			,IFNULL(pj.projectName,'') as projectName
+			,IFNULL(pj.category,'') as category
+			,IFNULL(pj.projectClientNo,'') as projectClientNo
+			,IFNULL(pj.projectClientName,'') as projectClientName
+			,IFNULL(pj.startupDate,'') as startupDate
+			,IFNULL(pj.finishDate,'') as finishDate
+			,IFNULL(pj.projectState,'') as projectState
+			,IFNULL(cl.carmake,'') as carmake
+			,IFNULL(pj.`function` ,'')as functionName
+			,IFNULL(pj.model,'') as model
+			,IFNULL(pj.memo,'') as memo
+			,IFNULL(pj.enterpriseSeg,'') as enterpriseSeg
+			,IFNULL(c.componentID,'') as componentID
+			,IFNULL(c.componentName,'') as componentName
+			,IFNULL(cs.componentSortName,'') as componentSortName
+			,IFNULL(pt.taskID,'') as taskID
+			,IFNULL(pt.task,'') as task
+			,IFNULL(m.date,'') as date
+			,m.times as times
+		from manhour_cxee m
+		      left join component c on m.componentid = c.id
+		      left join component_sort cs on c.componentSortID = cs.componentSortID
+		      ,view_department_cxee d
+		     ,view_branch_cxee b
+		     ,project_cxee pj
+		      left join view_carmake_list_cxee cl on pj.carMakerID = cl.carmakeID
+		     ,project_task_cxee pt
+		     ,staff_cxee s
+		     ,view_position_cxee p
+		where  m.staffID =s.staffID
+		  and m.projectID = pj.projectID
+		  and m.departmentID = d.departmentID
+		  and m.departmentID = b.departmentID
+		  and m.branchID = b.branchID
+		  and s.positionID = p.positionID
+		  and m.taskID = pt.taskID 	
+        <if test="departmentID!=null">
+          and m.departmentID = #{departmentID}
+          <if test="branchID!=null">
+          and m.branchID = #{branchID}
+          </if>
+        </if>
+          and m.date >= #{startDate}
+          and m.date &lt;= #{endDate}
+        order by s.staffID,pj.transferNo,m.projectID,m.taskID,m.date 
+    </select>
+	<select id="getCxeeCsvData_ForCt" parameterType="map" resultMap="CsvDataResultMap">
+		select distinct
+			s.staffID
+			,m.projectID
+			,IFNULL(s.companyName,'') as companyName
+			,s.name as name
+			,s.jobNo as jobNo
+			,IFNULL(s.enrolementCode,'') as enrolementCode
+			,m.departmentID
+			,m.branchID
+			,d.department as department
+			,IFNULL(b.branch,'') as branch
+			,IFNULL(p.position,'') as position
+			,IFNULL(s.jobCategory,'') as jobCategory
+			,IFNULL(s.sortID,'') as sortID
+			,IFNULL(s.sort,'') as sort
+			,IFNULL(pj.PJNo,'') as PJNo
+			,IFNULL(pj.PJName,'') as PJName
+			,IFNULL(pj.tempPJNo,'') as tempPJNo
+			,IFNULL(pj.transferNo,'') as transferNo
+			,IFNULL(pj.itemName,'') as itemName
+			,IFNULL(pj.projectName,'') as projectName
+			,IFNULL(pj.category,'') as category
+			,IFNULL(pj.projectClientNo,'') as projectClientNo
+			,IFNULL(pj.projectClientName,'') as projectClientName
+			,IFNULL(pj.startupDate,'') as startupDate
+			,IFNULL(pj.finishDate,'') as finishDate
+			,IFNULL(pj.projectState,'') as projectState
+			,IFNULL(cl.carmake,'') as carmake
+			,IFNULL(pj.`function` ,'')as functionName
+			,IFNULL(pj.model,'') as model
+			,IFNULL(pj.memo,'') as memo
+			,IFNULL(pj.enterpriseSeg,'') as enterpriseSeg
+			,IFNULL(c.componentID,'') as componentID
+			,IFNULL(c.componentName,'') as componentName
+			,IFNULL(cs.componentSortName,'') as componentSortName
+			,IFNULL(pt.taskID,'') as taskID
+			,IFNULL(pt.task,'') as task
+			,IFNULL(m.date,'') as date
+			,m.times as times
+		from manhour_ct m
+		      left join component c on m.componentid = c.id
+		      left join component_sort cs on c.componentSortID = cs.componentSortID
+		      ,view_department_ct d
+		     ,view_branch_ct b
+		     ,project_ct pj
+		      left join view_carmake_list_ct cl on pj.carMakerID = cl.carmakeID
+		     ,project_task_ct pt
+		     ,staff_ct s
+		     ,view_position_ct p
+		where  m.staffID =s.staffID
+		  and m.projectID = pj.projectID
+		  and m.departmentID = d.departmentID
+		  and m.departmentID = b.departmentID
+		  and m.branchID = b.branchID
+		  and s.positionID = p.positionID
+		  and m.taskID = pt.taskID 	
+        <if test="departmentID!=null">
+          and m.departmentID = #{departmentID}
+          <if test="branchID!=null">
+          and m.branchID = #{branchID}
+          </if>
+        </if>
+          and m.date >= #{startDate}
+          and m.date &lt;= #{endDate}
+        order by s.staffID,pj.transferNo,m.projectID,m.taskID,m.date 
+    </select>
+</mapper>

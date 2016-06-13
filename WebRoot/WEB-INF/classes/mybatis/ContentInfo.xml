@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.ContentInfoMapper">
+
+	<resultMap type="ContentMst" id="contentMstResultMap">
+		<id column="KeyCode" property="keyCode" />
+		<result column="ContentType" property="contentType" />
+		<result column="ContentText" property="contentText" />
+		<result column="ContentLink" property="contentLink" />
+	</resultMap>
+    
+    <select id="getContentList" resultMap="contentMstResultMap">
+		select * 
+		from view_content_info_cxee
+		where KeyCode != 'CI999999999'
+	</select>
+	<select id="getCTContentList" resultMap="contentMstResultMap">
+		select * 
+		from view_content_info_ct
+		where KeyCode != 'CI999999999'
+	</select>
+	
+    <select id="getContentText" resultType="String">
+		select ContentText 
+		from view_content_info_cxee
+		where KeyCode = 'CI999999999'
+	</select>
+	<select id="getCTContentText" resultType="String">
+		select ContentText 
+		from view_content_info_ct
+		where KeyCode = 'CI999999999'
+	</select>
+	
+	<select id="checkContentText" parameterType="map" resultType="int">
+		select count(1) 
+		  from content_info
+		 where KeyCode != 'CI999999999'
+		   and ContentType = #{type}
+		   and ContentText = #{content}
+	</select>
+	
+	<insert id="insContent" parameterType="map" useGeneratedKeys="false" keyProperty="keyCode">
+		insert into content_info (
+            `KeyCode`,
+            `ContentType`,
+            `ContentText`,
+            `ContentLink`,
+            `InsertUser`,
+            `InsertDate`,
+            `UpdateUser`,
+            `UpdateDate`
+        )
+		values(
+            #{keyCode},
+            #{type},
+            #{content},
+            #{link},
+            #{jobNo},
+            now(),
+            #{jobNo},
+            now()
+        )
+	</insert>
+	
+	<update id="updContent" parameterType="map">
+		update content_info 
+		set ContentType = #{type}
+            ,ContentText = #{content}
+            ,ContentLink = #{link}
+            ,UpdateUser = #{jobNo}
+            ,UpdateDate = now()
+		where KeyCode = #{keyCode}
+	</update>
+	
+	<delete id="delContent" parameterType="String">
+		delete from content_info 
+		where KeyCode = #{keyCode}		
+	</delete>
+</mapper>

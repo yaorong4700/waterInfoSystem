@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.ProjectSelectedMapper">
+
+	<resultMap type="ProjectTime" id="detailManhour">	
+		<result column="staffID" property="staffID" />
+		<result column="projectID" property="projectID" />
+		<result column="name" property="name" />
+		<result column="department" property="department" />
+		<result column="branch" property="branch" />
+		<result column="totalTime" property="totalTime" />
+	</resultMap>
+	
+	<resultMap type="Project" id="projectShowAllResultMap">
+		<id column="projectID" property="projectID"/>
+		<result column="category" property="category"/>
+		<result column="directProjectID" property="directProjectID"/>
+		<result column="projectName" property="projectName"/>
+		<result column="projectClientNo" property="projectClientNo"/>
+		<result column="projectClientName" property="projectClientName"/>
+		<result column="bunch" property="bunch"/>
+		<result column="startupDate" property="startupDate"/>
+		<result column="finishDate" property="finishDate"/>
+		<result column="projectState" property="projectState"/>
+		<result column="carMaker" property="carMaker"/>
+		<result column="function" property="function"/>
+		<result column="model" property="model"/>
+		<result column="transferNo" property="transferNo"/>
+		<result column="memo" property="memo"/>
+	</resultMap>
+	
+	<select id="getProjectCategoryList" resultType="map">
+		SELECT categoryID as "categoryID",category as "category" FROM view_project_category_cxee
+	</select>
+	
+	<select id="getProjectCategoryListCT" resultType="map">
+		SELECT categoryID as "categoryID",category as "category" FROM view_project_category_ct
+	</select>
+	<select id="getFuctionList" resultType="map">
+		SELECT functionID as "functionID",functionName as "functionName" FROM view_functionlist_cxee
+	</select>
+	<select id="getFuctionListCT" resultType="map">
+		SELECT functionID as "functionID",functionName as "functionName" FROM view_functionlist_ct
+	</select>
+	<select id="getProjectDepartmentListCXEE" resultType="map">
+		SELECT departmentID as "departmentID",department as "department" FROM view_department_cxee
+	</select>
+	<select id="getProjectDepartmentListCT" resultType="map">
+		SELECT departmentID as "departmentID",department as "department" FROM view_department_ct
+	</select>
+	
+	<select id="getCarMakeList" resultType="map">
+		SELECT carmakeID as "carmakeID",carmake as "carmake" FROM view_carmake_list_cxee
+	</select>
+	<select id="getCarMakeListCT" resultType="map">
+		SELECT carmakeID as "carmakeID",carmake as "carmake" FROM view_carmake_list_ct
+	</select>
+	
+	<select id="getBranchListCXEEBydepartmentID" parameterType="String"   resultType="map">
+		SELECT branchID as "branchID",branch as "branch" FROM view_branch_cxee
+		where departmentID = #{departmentID}
+		group by branch
+	</select>
+	<select id="getProjectBranchListCXEE" resultType="map">
+		SELECT branchID as "branchID",branch as "branch" FROM view_branch_cxee
+	</select>
+	<select id="getPositionList" resultType="map">
+		SELECT positionID as "positionID",position as "position" FROM position
+	</select>
+	<select id="getPositionListCXEE" resultType="map">
+		SELECT positionID as "positionID",position as "position" FROM view_position_cxee
+	</select>
+	<select id="getPositionListCT" resultType="map">
+		SELECT positionID as "positionID",position as "position" FROM view_position_ct
+	</select>
+    <select id="getDepartmentList" resultType="map">
+<!-- 		SELECT departmentID as "departmentID",department as "department" FROM department where branch is null -->
+		SELECT departmentID as "departmentID",department as "department" FROM department
+	</select>
+    
+    <select id="getDepartmentListCXEE" resultType="map">
+		SELECT departmentID as "departmentID",department as "department" FROM view_department_cxee
+	</select>
+	<select id="getBranchListCXEE" parameterType="String" resultType="map">
+		SELECT branchID as "branchID",branch as "branch" FROM view_branch_cxee
+		where departmentID = #{departmentID}
+		group by branch
+	</select>
+	<select id="getBranchListCT" parameterType="String" resultType="map">
+		select branchID as "branchID",branch as "branch"
+		from view_branch_ct
+		where departmentID = #{departmentID}
+		group by branch
+	</select>
+	
+    <select id="getStaffSortList" resultType="map">
+		SELECT sortid as "sortID",sort as "sort" FROM staff_sort
+	</select>
+	
+	<select id="getRoleList" resultType="map">
+		SELECT distinct KeyCode as "roleID",RoleName as "roleName" FROM user_role
+	</select>
+	
+    <select id="getBranchList" parameterType="String" resultType="map">
+		select branchID as "branchID",branch as "branch"
+		from branch
+		where departmentID = #{departmentID}
+		group by branch
+	</select>
+	<select id="getBranchListOfDevelopDepartment" resultType="map">
+		select branchID ,branch 
+		from branch
+		where (departmentID = 10 and branchID != 2)
+		 or departmentID = 11
+		 or departmentID = 12
+		order by branchID
+	</select>
+
+    <select id="getTeamList" resultType="String">
+<!-- 		SELECT team FROM department group by team -->
+		SELECT team FROM branch group by team
+	</select>
+	
+	<select id="getDepartmentByID" parameterType="int" resultType="String">
+		SELECT department FROM department where departmentID = #{departmentID};
+	</select>
+	
+	<select id="getLeadList" parameterType="String" resultType="String">
+		SELECT name FROM staffView where position in ('部长','统括经理','课长','统括课长','经理','高级工程师','高级专员','专家','高级专家') and departmentID = #{departmentID} 
+	</select>
+
+	<select id="getDetailManhour" parameterType="map" resultMap="detailManhour">
+	
+		SELECT m.staffID,m.projectID,s.name,s.department,s.branch,sum(m.times) totalTime FROM manhour m,staffView s 
+		
+		where m.staffID = s.staffID and s.department = #{department} 
+	 
+ 	    <if test="branch!=null">
+		   and s.branch = #{branch}
+	    </if>
+	    
+		and s.state = 1 and m.date >= #{startTime} and 
+
+         m.date &lt; #{endTime} group by m.projectID,m.staffID order by s.branch,m.staffID;
+	</select>
+	
+	<select id="getDetailProject" parameterType="map" resultMap="projectShowAllResultMap">
+	
+	    SELECT * FROM project 
+	    where projectID in (SELECT projectID FROM project_department p ,department d where  d.branch is null and d.department = #{department} and p.departmentID = d.departmentID) 
+	    <if test="projectClientName!=null">
+		   and projectClientName = #{projectClientName}
+	    </if>
+	    
+
+	</select>
+
+</mapper>

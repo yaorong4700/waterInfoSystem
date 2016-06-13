@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.MessageMapper">
+<sql id="messageColumns">message,state</sql>
+	<resultMap type="Message" id="messageMap">
+		<id column="id" property="id"/>
+		<result column="message" property="message"/>
+		<result column="state" property="state"/>
+	</resultMap>
+	
+	<select id="getMessage" resultMap="messageMap">
+		SELECT * 
+		FROM message
+		where state= '启用'
+	</select>
+	<select id="listMessages"  parameterType="MessageReqParam" resultMap="messageMap">
+	SELECT  id,message,state
+	FROM message 
+	WHERE id NOT IN
+	( SELECT id FROM (SELECT id FROM message where 1 = 1
+	<if test="message!=null">
+			and message like CONCAT('%','${message}','%')
+	</if>
+	
+	<if test="state!=null">
+			and state like CONCAT('%','${state}','%')
+	</if>
+	
+	ORDER BY id  LIMIT #{pageSeq} ) AS T) 
+	<if test="message!=null">
+			and message like CONCAT('%','${message}','%' )  
+	</if> 
+	
+	<if test="state!=null">
+			and state like CONCAT('%','${state}','%' )  
+	</if> 
+	
+	ORDER BY id  LIMIT #{rp}
+	</select>
+	<select id="totalPageCount" parameterType="MessageReqParam" resultType="int">
+	    select count(1) from message where 1=1
+		<if test="message!=null">
+			and message like CONCAT('%','${message}','%' )
+		</if>
+		
+	    <if test="state!=null">
+			and state like CONCAT('%','${state}','%')
+	   </if>
+	</select>
+	<select id="getMessageById" parameterType="int" resultMap="messageMap">
+		select *
+		from message  where id = #{id}
+	</select>
+	<insert id="insertMessage" parameterType="Message" >
+		insert into message (id,message,state)
+		values (#{id},#{message},#{state})
+	</insert>
+	<delete id="deleteMessages" >
+		delete from message where
+		id in 
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">  
+         #{item}  
+       </foreach>  
+	</delete>
+	<update id="updateMessage" parameterType="message">
+		update message set
+		message = #{message},
+		state = #{state}
+		where
+		id=#{id}
+	</update>
+</mapper>
+

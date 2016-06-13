@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD SQL Map Config 3.0//EN"  
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias type="com.clarion.worksys.entity.ManHour" alias="ManHour"/>
+		<typeAlias type="com.clarion.worksys.entity.ManHourDto" alias="ManHourDto"/>
+		<typeAlias type="com.clarion.worksys.entity.ManHourDtoCT" alias="ManHourDtoCT"/>
+		<typeAlias type="com.clarion.worksys.entity.ManhourDate" alias="ManhourDate"/>
+		<typeAlias type="com.clarion.worksys.entity.Staff" alias="Staff"/>
+		<typeAlias type="com.clarion.worksys.entity.RequestObject" alias="RequestObject"/>
+		<typeAlias type="com.clarion.worksys.entity.Project" alias="Project"/>
+		<typeAlias type="com.clarion.worksys.entity.Project_category" alias="Project_category"/>
+	    <typeAlias type="com.clarion.worksys.entity.CalendarManhour" alias="CalendarManhour"/>
+	    <typeAlias type="com.clarion.worksys.entity.Project_task" alias="Project_task"/>
+	    <typeAlias type="com.clarion.worksys.httpentity.StaffReqParam" alias="StaffReqParam"/>
+	    <typeAlias type="com.clarion.worksys.entity.ManhourShowData" alias="ManhourShowData"/>
+	    <typeAlias type="com.clarion.worksys.entity.Message" alias="Message"/>
+<!--  	<typeAlias type="com.clarion.worksys.entity.StaffProjectQueryOut" alias="StaffProjectQueryOut"/>
+	    <typeAlias type="com.clarion.worksys.entity.StaffProjectQueryIn" alias="StaffProjectQueryIn"/>
+	    -->
+	    <typeAlias type="com.clarion.worksys.entity.ManhourReqParam" alias="ManhourReqParam"/>
+	    <typeAlias type="com.clarion.worksys.entity.ManhourPersonalQueryParam" alias="ManhourPersonalQueryParam"/>
+	    <typeAlias type="com.clarion.worksys.entity.ManhourPersonalQueryView" alias="ManhourPersonalQueryView"/>
+	    <typeAlias type="com.clarion.worksys.entity.Blacklist" alias="Blacklist"/>
+	    <typeAlias type="com.clarion.worksys.entity.ManhourCheckErrorParam" alias="ManhourCheckErrorParam"/>
+	    <typeAlias type="com.clarion.worksys.httpentity.ProjectReqParam" alias="ProjectReqParam"/>
+	    <typeAlias type="com.clarion.worksys.httpentity.MessageReqParam" alias="MessageReqParam"/>
+	    <typeAlias type="com.clarion.worksys.httpentity.ProjectTaskReqParam" alias="ProjectTaskReqParam"/>
+	    <typeAlias type="com.clarion.worksys.entity.ManhourByProject" alias="ManhourByProject"/>
+	    <typeAlias type="com.clarion.worksys.entity.ProjectTime" alias="ProjectTime"/>
+	    <!-- 通知-->
+		<typeAlias type="com.clarion.worksys.entity.ContentMst" alias="ContentMst"/>
+		<!-- 人员权限管理 -->
+		<typeAlias type="com.clarion.worksys.entity.UserRoleManage" alias="UserRoleManage"/>
+		<typeAlias type="com.clarion.worksys.entity.PageMst" alias="PageMst"/>
+		<typeAlias type="com.clarion.worksys.entity.BlacklistCT" alias="BlacklistCT"/>
+		<!-- コンポーネント管理 -->
+		<typeAlias type="com.clarion.worksys.httpentity.ComponentReqParam" alias="ComponentReqParam"/>
+		<typeAlias type="com.clarion.worksys.entity.Component" alias="Component"/>
+		<!-- 总工数查询 -->
+		<typeAlias type="com.clarion.worksys.httpentity.TotalHourManageReqParam" alias="TotalHourManageReqParam"/>
+		<!-- CSV导出 -->
+		<typeAlias type="com.clarion.worksys.entity.CsvData" alias="CsvData"/>
+		<!-- 开发部门管理 -->
+		<typeAlias type="com.clarion.worksys.entity.DevelopDepartment" alias="DevelopDepartment"/>
+		<typeAlias type="com.clarion.worksys.httpentity.DevelopDepartmentReqParam" alias="DevelopDepartmentReqParam"/>
+		
+		
+		<typeAlias type="com.clarion.worksys.entity.UserRole" alias="UserRole"/>
+	    <typeAlias type="com.clarion.worksys.entity.WaterInfo" alias="WaterInfo"/>
+		<typeAlias type="com.clarion.worksys.httpentity.RegionSumReqParam" alias="RegionSumReqParam"/>
+		<typeAlias type="com.clarion.worksys.httpentity.RegionPicReqParam" alias="RegionPicReqParam"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="mybatis/ManHour.xml"/>
+		<mapper resource="mybatis/Message.xml"/>
+		<mapper resource="mybatis/Staff.xml"/>
+		<mapper resource="mybatis/Project.xml"/>
+		<mapper resource="mybatis/Project_task.xml"/>
+		<mapper resource="mybatis/CalendarManhour.xml"/>
+		<mapper resource="mybatis/StaffSelectedManhour.xml"/>
+		<mapper resource="mybatis/Project_task.xml"/>
+		<mapper resource="mybatis/ContentInfo.xml"/>
+		<mapper resource="mybatis/UserRoleManage.xml"/>
+		<mapper resource="mybatis/Component.xml"/>
+		<mapper resource="mybatis/ProjectSelectedManhour.xml" />
+		<mapper resource="mybatis/TotalHourManager.xml"/>
+		<mapper resource="mybatis/DevelopDepartment.xml" />
+		
+		
+		<mapper resource="mybatis/UserRole.xml"/>
+		<mapper resource="mybatis/RegionSumWaterInfo.xml"/>
+		<mapper resource="mybatis/RegionPicWaterInfo.xml"/>
+	</mappers>
+	
+</configuration>

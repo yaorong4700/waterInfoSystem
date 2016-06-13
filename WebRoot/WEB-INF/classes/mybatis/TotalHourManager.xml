@@ -1,0 +1,1971 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.TotalHourManageMapper">
+	<resultMap type="com.clarion.worksys.entity.TotalHourManager" id="totalHourManagerResultMap">
+		<result column="department" property="department" />
+		<result column="branch" property="branch" />
+		<result column="staffName" property="staffName" />
+		<result column="position" property="position" />
+		<result column="category" property="category" />
+		<result column="projectClientNo" property="projectClientNo" />
+		<result column="PJName" property="PJName"/>
+		<result column="projectClientName" property="projectClientName"/>
+		<result column="sort" property="sort"/>
+		<result column="jobCategory" property="jobCategory"/>
+		<result column="PJNo" property="PJNo"/>
+		<result column="tempPJNo" property="tempPJNo"/>
+		<result column="carMaker" property="carMaker"/>
+		<result column="projectName" property="projectName"/>
+		<result column="achieve1" property="achieve1" />
+		<result column="achieve2" property="achieve2" />
+		<result column="achieve3" property="achieve3" />
+		<result column="achieve4" property="achieve4" />
+		<result column="achieve5" property="achieve5" />
+		<result column="achieve6" property="achieve6" />
+		<result column="achieve7" property="achieve7" />
+		<result column="achieve8" property="achieve8" />
+		<result column="achieve9" property="achieve9" />
+		<result column="achieve10" property="achieve10" />
+		<result column="achieve11" property="achieve11" />
+		<result column="achieve12" property="achieve12" />	
+	</resultMap>
+	
+	<resultMap type="com.clarion.worksys.entity.TotalHourManagerSum" id="totalHourManagerSumResultMap">
+		<result column="achieve1" property="achieve1"/>
+		<result column="achieve2" property="achieve2"/>
+		<result column="achieve3" property="achieve3"/>
+		<result column="achieve4" property="achieve4"/>
+		<result column="achieve5" property="achieve5"/>
+		<result column="achieve6" property="achieve6"/>
+		<result column="achieve7" property="achieve7"/>
+		<result column="achieve8" property="achieve8"/>
+		<result column="achieve9" property="achieve9"/>
+		<result column="achieve10" property="achieve10"/>
+		<result column="achieve11" property="achieve11"/>
+		<result column="achieve12" property="achieve12"/>
+	</resultMap>	
+	
+	<select id="listSearch" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerResultMap">
+	select sort,jobCategory,PJNo,tempPJNo,staffID,department,branch,staffName,position,staffNamecount,category,projectClientNo,PJName,projectClientName,carMaker,projectID
+		   ,sum(achieve4) as achieve4,sum(achieve5) as achieve5,sum(achieve6) as achieve6,sum(achieve7) as achieve7,sum(achieve8) as achieve8,sum(achieve9) as achieve9
+		   ,sum(achieve10) as achieve10,sum(achieve11) as achieve11,sum(achieve12) as achieve12,sum(achieve1) as achieve1,sum(achieve2) as achieve2,sum(achieve3) as achieve3
+	from(
+			(
+				select  department.department               department
+					,staff.staffID					 		staffID
+					,staff.sort					 			sort
+					,staff.jobCategory						jobCategory
+					,project_ct.PJNo				 		PJNo
+					,project_ct.tempPJNo			 		tempPJNo
+					,project_ct.projectName		 			projectName
+					,branch.branch               			branch 
+					,staff.name                 			staffName
+					,staff.position             			position
+					,concat(staff.staffID,staff.departmentID,staff.branchID)   staffNamecount
+					,manhour_ct.category   		 			category
+					,project_ct.projectClientNo     		projectClientNo
+					,project_ct.PJName         				PJName
+					,project_ct.projectClientName   		projectClientName
+					,project_ct.carMaker            		carMaker
+					,manhour_ct.departmentID        		departmentID
+					,manhour_ct.branchID            		branchID 
+					,project_ct.projectID					projectID
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+					
+					from 
+					(select * from manhour_ct 
+						where 1=1
+						
+						 and (cast(CONCAT(substring(manhour_ct.date,1,7),'-01') as Date) between 
+									cast(CONCAT(#{currentYear},'0401') as Date)
+								and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+		        		 and  manhour_ct.times > 0  )manhour_ct
+					LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+					LEFT JOIN (select staffID,departmentID,branchID,email,sort,jobCategory,name,position
+								from view_staffview_ct staff
+								where staff.email like CONCAT('%','@clarion.co.jp','%')
+					)AS staff 
+						LEFT JOIN view_department_ct AS department ON staff.departmentID=department.departmentID
+						LEFT JOIN view_branch_ct AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+					ON manhour_ct.staffID=staff.staffID 
+					and manhour_ct.departmentID=staff.departmentID
+					and manhour_ct.branchID=staff.branchID
+					
+					where staff.email like CONCAT('%','@clarion.co.jp','%')
+							
+					<if test="sel_sort != null">
+							and staff.sort = #{sel_sort}
+					</if>
+					<if test="sel_PJNo != null">
+							and project_ct.PJNo = #{sel_PJNo}
+					</if>
+					<if test="sel_tempPJNo != null">
+							and project_ct.tempPJNo = #{sel_tempPJNo}
+					</if>
+					<if test="serach_transferNo != null">
+							and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+					</if>
+					<if test="sel_category != null">
+							and manhour_ct.category = #{sel_category}
+					</if>
+					
+					<if test="sel_carMaker != null">
+							and project_ct.carMaker = #{sel_carMaker}
+					</if>
+					<if test="sel_projectFunction != null">
+							and project_ct.function = #{sel_projectFunction}
+					</if>
+					<if test="sel_PJName != null">
+							and project_ct.PJName = #{sel_PJName}
+					</if>
+			 	group by departmentID,branchID,staffID,position,project_ct.projectID
+			 	order by departmentID,branchID,staffID,position,project_ct.projectID
+	        )
+	        union all
+	        (
+				select  department.department         			department
+					,staff.staffID					 			staffID
+					,staff.sort									sort
+					,staff.jobCategory							jobCategory
+					,project_cxee.PJNo				 			PJNo
+					,project_cxee.tempPJNo			 			tempPJNo
+					,project_cxee.projectName		 			projectName
+					,branch.branch               				branch 
+					,staff.name                  				staffName
+					,staff.position              				position
+					,concat(staff.staffID,staff.departmentID,staff.branchID)   staffNamecount
+					,manhour_cxee.category   		 			category
+					,project_cxee.projectClientNo     			projectClientNo
+					,project_cxee.projectName         			PJName
+					,project_cxee.projectClientName   			projectClientName
+					,project_cxee.carMaker            			carMaker
+					,manhour_cxee.departmentID       			departmentID
+					,manhour_cxee.branchID            			branchID 
+					,project_cxee.projectID						projectID
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+					
+					from 
+					(select * from manhour_cxee 
+						where  1=1
+					
+						 and (cast(CONCAT(substring(manhour_cxee.date,1,7),'-01') as Date) between 
+									cast(CONCAT(#{currentYear},'0401') as Date)
+								and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+		        		 and  manhour_cxee.times > 0  
+					)manhour_cxee
+					LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+					LEFT JOIN (select staffID,departmentID,branchID,email,sort,jobCategory,name,position
+								from view_staffview_cxee staff
+								where staff.email not like CONCAT('%','@clarion.co.jp','%')
+					)staff 
+						LEFT JOIN view_department_cxee AS department ON staff.departmentID=department.departmentID
+						LEFT JOIN view_branch_cxee AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+					ON manhour_cxee.staffID=staff.staffID
+					and manhour_cxee.departmentID=staff.departmentID
+					and manhour_cxee.branchID=staff.branchID
+					
+					where  staff.email not like CONCAT('%','@clarion.co.jp','%')
+						
+					<if test="sel_sort != null">
+							and staff.sort = #{sel_sort}
+					</if>
+					<if test="sel_PJNo != null">
+							and project_cxee.PJNo = #{sel_PJNo}
+					</if>
+					<if test="sel_tempPJNo != null">
+							and project_cxee.tempPJNo = #{sel_tempPJNo}
+					</if>
+					<if test="serach_transferNo != null">
+							and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+					</if>
+					<if test="sel_category != null">
+							and manhour_cxee.category = #{sel_category}
+					</if>
+					<if test="sel_carMaker != null">
+							and project_cxee.carMaker = #{sel_carMaker}
+					</if>
+					<if test="sel_projectFunction != null">
+							and project_cxee.function = #{sel_projectFunction}
+					</if>
+					<if test="sel_PJName != null">
+							and project_cxee.PJName = #{sel_PJName}
+					</if>
+			 	group by departmentID,branchID,staffID,position,project_cxee.projectID
+			 	order by departmentID,branchID,staffID,position,project_cxee.projectID
+	        )
+		)tabletotle 
+	where tabletotle.staffNamecount IN (
+ 		select DISTINCT staffNameCount
+ 		from(
+ 		
+ 		select * from (
+		(select DISTINCT (concat(staff.StaffID,staff.departmentID,staff.branchID)) staffNameCount,
+			staff.departmentID,
+			staff.branchID,
+			staff.staffID
+						
+		from 
+		(select * from manhour_cxee 
+		where  1=1
+					 and (cast(CONCAT(substring(manhour_cxee.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  manhour_cxee.times > 0  
+		)manhour_cxee
+		
+		LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+		LEFT JOIN (select  staffID,departmentID,branchID,email,sort,name,position
+					from view_staffview_cxee staff
+					where staff.email not like CONCAT('%','@clarion.co.jp','%')
+		)AS staff ON manhour_cxee.staffID=staff.staffID
+		and manhour_cxee.departmentID=staff.departmentID
+		and manhour_cxee.branchID=staff.branchID
+		where staff.email not like CONCAT('%','@clarion.co.jp','%')
+				
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo = #{sel_PJNo}
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo = #{sel_tempPJNo}
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName = #{sel_PJName}
+			</if>
+			group by manhour_cxee.departmentID,manhour_cxee.branchID,staff.staffID
+	        order by manhour_cxee.departmentID,manhour_cxee.branchID,staff.staffID
+	      
+	        )
+	    union all
+	    (select DISTINCT (concat(staff.StaffID,staff.departmentID,staff.branchID)) staffNameCount,
+			staff.departmentID,
+			staff.branchID,
+			staff.staffID
+						
+		from 
+		(select * from manhour_ct 
+		where  1=1
+					 and (cast(CONCAT(substring(manhour_ct.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  manhour_ct.times > 0   
+		)manhour_ct
+		
+		LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+		LEFT JOIN (select staffID,departmentID,branchID,email,sort,name,position
+					from view_staffview_ct staff
+					where staff.email like CONCAT('%','@clarion.co.jp','%')
+					 )AS staff 
+					 ON manhour_ct.staffID=staff.staffID
+					 	and manhour_ct.departmentID=staff.departmentID
+						and manhour_ct.branchID=staff.branchID
+					 
+		where staff.email like CONCAT('%','@clarion.co.jp','%')
+				
+			
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo = #{sel_PJNo}
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo = #{sel_tempPJNo}
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName = #{sel_PJName}
+			</if>
+			group by manhour_ct.departmentID,manhour_ct.branchID,staff.staffID
+	        order by manhour_ct.departmentID,manhour_ct.branchID,staff.staffID
+	       
+	        )
+ 	) T1
+	order by departmentID,branchID,staffID
+	limit #{pageSeq},#{rp}
+ 	) T2	
+)
+group by departmentID,branchID,staffID,position,projectID
+order by departmentID,branchID,staffID,position,projectID
+
+	</select>
+	<select id="listSearchCXEE" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerResultMap">
+	select sort,jobCategory,PJNo,tempPJNo,staffID,department,branch,staffName,position,staffNamecount,category,projectClientNo,projectID,PJName,projectClientName,carMaker
+		   ,sum(achieve4) as achieve4,sum(achieve5) as achieve5,sum(achieve6) as achieve6,sum(achieve7) as achieve7,sum(achieve8) as achieve8,sum(achieve9) as achieve9,
+		   sum(achieve10) as achieve10,sum(achieve11) as achieve11,sum(achieve12) as achieve12,sum(achieve1) as achieve1,sum(achieve2) as achieve2,sum(achieve3) as achieve3
+	from(
+			select  department.department         			department
+				,staff.staffID					 			staffID
+				,staff.sort									sort
+				,staff.jobCategory							jobCategory
+				,project_cxee.PJNo				 			PJNo
+				,project_cxee.tempPJNo			 			tempPJNo
+				,project_cxee.projectID		 				projectID
+				,project_cxee.projectName		 			projectName
+				,branch.branch               				branch 
+				,staff.name                  				staffName
+				,staff.position              				position
+				,concat(staff.staffID,staff.departmentID,staff.branchID)   staffNamecount
+				,manhour_cxee.category   		 			category
+				,project_cxee.projectClientNo     			projectClientNo
+				,project_cxee.PJName         				PJName
+				,project_cxee.projectClientName   			projectClientName
+				,project_cxee.carMaker            			carMaker
+				,manhour_cxee.departmentID       			departmentID
+				,manhour_cxee.branchID            			branchID 
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+				
+				from (select * from view_manhour_cxee 
+						where  1=1
+						 and (cast(CONCAT(substring(view_manhour_cxee.date,1,7),'-01') as Date) between 
+									cast(CONCAT(#{currentYear},'0401') as Date)
+								and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+		        		 and  view_manhour_cxee.times > 0  
+				)manhour_cxee
+				
+				LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+				LEFT JOIN (select email,departmentID,branchID,name,position,sort,jobCategory,staffID
+							from view_staffview_cxee AS staff 
+							where staff.email not like CONCAT('%','@clarion.co.jp','%')
+				) AS staff 
+					LEFT JOIN view_department_cxee AS department ON staff.departmentID=department.departmentID
+					LEFT JOIN view_branch_cxee AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+				ON manhour_cxee.staffID=staff.staffID
+				and manhour_cxee.departmentID=staff.departmentID
+				and manhour_cxee.branchID=staff.branchID
+				where staff.email not like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_cxee.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_cxee.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+		 	group by staff.departmentID,staff.branchID,staff.staffID,project_cxee.projectID
+		 	
+    	)tabletotle 
+ 	where tabletotle.staffNamecount IN (
+ 		select DISTINCT staffNameCount from (
+		select DISTINCT (concat(staff.StaffID,staff.departmentID,staff.branchID)) staffNameCount
+		from (select * from view_manhour_cxee 
+						where  1=1
+						 and (cast(CONCAT(substring(view_manhour_cxee.date,1,7),'-01') as Date) between 
+									cast(CONCAT(#{currentYear},'0401') as Date)
+								and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+		        		 and  view_manhour_cxee.times > 0  
+				)manhour_cxee
+		LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+		LEFT JOIN (select email,departmentID,branchID,name,position,sort,jobCategory,staffID
+							from view_staffview_cxee AS staff 
+							where staff.email not like CONCAT('%','@clarion.co.jp','%')
+				) AS staff  
+		ON manhour_cxee.staffID=staff.staffID
+			and manhour_cxee.departmentID=staff.departmentID
+			and manhour_cxee.branchID=staff.branchID		
+		where staff.email not like CONCAT('%','@clarion.co.jp','%')
+				
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_cxee.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_cxee.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+			group by manhour_cxee.departmentID,manhour_cxee.branchID,staff.staffID,project_cxee.projectID
+	        order by manhour_cxee.departmentID,manhour_cxee.branchID,staff.staffID,project_cxee.projectID
+	        limit #{pageSeq},#{rp}
+ 	) T1
+)
+group by departmentID,branchID,position,staffID,projectID
+order by departmentID,branchID,position,staffID,projectID
+
+	</select>
+	<select id="listSearchCT" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerResultMap">
+	select sort,jobCategory,PJNo,tempPJNo,projectID,staffID,department,branch,staffName,position,staffNamecount,category,projectClientNo,PJName,projectClientName,carMaker,
+	      sum(achieve4) as achieve4,sum(achieve5) as achieve5,sum(achieve6) as achieve6,sum(achieve7) as achieve7,sum(achieve8) as achieve8,sum(achieve9) as achieve9,
+	      sum(achieve10) as achieve10,sum(achieve11) as achieve11,sum(achieve12) as achieve12,sum(achieve1) as achieve1,sum(achieve2) as achieve2,sum(achieve3) as achieve3
+	from(
+				select  department.department 					department
+					,staff.staffID					 			staffID
+					,staff.sort					 				sort
+					,staff.jobCategory			 				jobCategory
+					,project_ct.PJNo				 			PJNo
+					,project_ct.tempPJNo			 			tempPJNo
+					,project_ct.projectID		 				projectID
+					,project_ct.projectName		 				projectName
+					,branch.branch               				branch 
+					,staff.name                  				staffName
+					,staff.position              				position
+					,concat(staff.staffID,staff.departmentID,staff.branchID)   staffNamecount
+					,manhour_ct.category   		 				category
+					,project_ct.projectClientNo     			projectClientNo
+					,project_ct.PJName         					PJName
+					,project_ct.projectClientName   			projectClientName
+					,project_ct.carMaker            			carMaker
+					,manhour_ct.departmentID        			departmentID
+					,manhour_ct.branchID            			branchID 
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+					
+					from (select * from view_manhour_ct
+							where  1=1
+					
+							 and (cast(CONCAT(substring(view_manhour_ct.date,1,7),'-01') as Date) between 
+										cast(CONCAT(#{currentYear},'0401') as Date)
+									and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+			        		 and  view_manhour_ct.times > 0  
+					)manhour_ct
+					LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+					LEFT JOIN (select staffID,email,name,position,departmentID,branchID,sort,jobCategory
+								from view_staffview_ct as staff
+								where staff.email like CONCAT('%','@clarion.co.jp','%')
+					) as staff 
+						LEFT JOIN view_department_ct as department ON staff.departmentID=department.departmentID 
+						LEFT JOIN view_branch_ct as branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID	
+					ON manhour_ct.staffID=staff.staffID
+					and manhour_ct.departmentID=staff.departmentID
+					and manhour_ct.branchID=staff.branchID
+					where staff.email like CONCAT('%','@clarion.co.jp','%')
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_ct.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_ct.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>		
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			
+		 	group by staff.departmentID,staff.branchID,staff.staffID,project_ct.projectID
+	        
+	) as tabletotle 
+	where tabletotle.staffNamecount IN (
+ 		select DISTINCT staffNameCount from (
+		select DISTINCT (concat(staff.StaffID,staff.departmentID,staff.branchID)) staffNameCount,
+						staff.departmentID,
+						staff.branchID,
+						staff.staffID
+		from (select * from view_manhour_ct
+				where 1=1
+					 and (cast(CONCAT(substring(view_manhour_ct.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  view_manhour_ct.times > 0   
+			)manhour_ct
+		LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+		LEFT JOIN (select email,staffID,departmentID,branchID,sort,jobCategory,position,name
+					from view_staffview_ct AS staff
+						where staff.email like CONCAT('%','@clarion.co.jp','%')
+		) AS staff ON manhour_ct.staffID=staff.staffID 
+		and manhour_ct.departmentID=staff.departmentID
+		and manhour_ct.branchID=staff.branchID
+		
+		where staff.email like CONCAT('%','@clarion.co.jp','%')
+		<if test="serach_staffName != null">
+				and staff.name like CONCAT('%','${serach_staffName}','%')
+		</if>
+		<if test="sel_position != null">
+				and staff.position = #{sel_position}
+		</if>
+		<if test="sel_sort != null">
+				and staff.sort = #{sel_sort}
+		</if>
+		<if test="sel_jobCategory != null">
+				and staff.jobCategory = #{sel_jobCategory}
+		</if>
+		<if test="serach_projectClientNo != null">
+				and project_ct.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+		</if>
+		<if test="sel_PJNo != null">
+				and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+		</if>
+		<if test="sel_tempPJNo != null">
+				and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+		</if>
+		<if test="serach_transferNo != null">
+				and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+		</if>
+		<if test="sel_projectClientName != null">
+				and project_ct.projectClientName = #{sel_projectClientName}
+		</if>
+		<if test="sel_carMaker != null">
+				and project_ct.carMaker = #{sel_carMaker}
+		</if>
+		<if test="sel_projectFunction != null">
+				and project_ct.function = #{sel_projectFunction}
+		</if>
+		<if test="sel_PJName != null">
+				and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+		</if>
+		<if test="sel_department != null">
+				and staff.departmentID = #{sel_department}
+		</if>
+		<if test="sel_branch != null">
+				and staff.branchID = #{sel_branch}
+		</if>
+		
+		<if test="sel_category != null">
+				and manhour_ct.category = #{sel_category}
+		</if>
+			
+			group by manhour_ct.departmentID,manhour_ct.branchID,staff.staffID
+	        order by manhour_ct.departmentID,manhour_ct.branchID,staff.staffID
+	        limit #{pageSeq},#{rp}
+ 	) T1
+)
+group by departmentID,branchID,position,staffID,projectID
+order by departmentID,branchID,position,staffID,projectID
+
+	</select>
+	
+	<select id="sumSearch" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerSumResultMap">
+	select sum(achieve4) as achieve4,sum(achieve5) as achieve5,sum(achieve6) as achieve6,sum(achieve7) as achieve7,
+           sum(achieve8) as achieve8,sum(achieve9) as achieve9,sum(achieve10) as achieve10,sum(achieve11) as achieve11,
+           sum(achieve12) as achieve12,sum(achieve1) as achieve1,sum(achieve2) as achieve2,sum(achieve3) as achieve3
+	
+	from(
+			(select sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12					
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+			from (select * from manhour_ct 
+				where 1=1
+				and (cast(CONCAT(substring(manhour_ct.date,1,7),'-01') as Date) between 
+					cast(CONCAT(#{currentYear},'0401') as Date)
+						and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        	and  manhour_ct.times > 0 
+			)manhour_ct
+			LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+			LEFT JOIN (select  staffID,departmentID,branchID,sort,email
+						from view_staffview_ct staff
+						where staff.email like CONCAT('%','@clarion.co.jp','%')
+			
+			)AS staff ON manhour_ct.staffID=staff.staffID
+			and manhour_ct.departmentID=staff.departmentID
+			and manhour_ct.branchID=staff.branchID 
+			
+			where staff.email like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_ct.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_ct.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+	          )
+	    
+	    union all
+	    
+	    (select sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12					
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+			from 
+			(select * from manhour_cxee
+			where 1=1
+				and (cast(CONCAT(substring(manhour_cxee.date,1,7),'-01') as Date) between 
+					cast(CONCAT(#{currentYear},'0401') as Date)
+						and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        	and  manhour_cxee.times > 0 
+			)manhour_cxee
+			
+			LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+			LEFT JOIN (select staffID,departmentID,branchID,sort,email
+						from view_staffview_cxee staff
+						where staff.email not like CONCAT('%','@clarion.co.jp','%')
+			
+			)AS staff ON manhour_cxee.staffID=staff.staffID 
+			and manhour_cxee.departmentID=staff.departmentID
+			and manhour_cxee.branchID=staff.branchID
+			
+			where staff.email not like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_cxee.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_cxee.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+	          )
+	    )sum
+	</select>
+	<select id="sumSearchCXEE" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerSumResultMap">
+	select achieve4,achieve5,achieve6,achieve7,achieve8,achieve9,achieve10,achieve11,achieve12,achieve1,achieve2,achieve3
+	
+	from(
+			select sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12					
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+			from (select * from view_manhour_cxee
+					where 1=1
+					and (cast(CONCAT(substring(view_manhour_cxee.date,1,7),'-01') as Date) between 
+						cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+		        	and  view_manhour_cxee.times > 0 
+			)manhour_cxee
+			LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+			LEFT JOIN (select staffID,email,name,departmentID,branchID,position,sort,jobCategory
+						from view_staffview_cxee AS staff
+						where staff.email not like CONCAT('%','@clarion.co.jp','%')
+			) AS staff ON manhour_cxee.staffID=staff.staffID
+			and manhour_cxee.departmentID=staff.departmentID
+			and manhour_cxee.branchID=staff.branchID
+			where staff.email not like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_cxee.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_cxee.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+	          )sumCXEE
+	</select>
+	<select id="sumSearchCT" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerSumResultMap">
+	select achieve4,achieve5,achieve6,achieve7,achieve8,achieve9,achieve10,achieve11,achieve12,achieve1,achieve2,achieve3
+	
+	from(
+			select sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12					
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+			from (select * from view_manhour_ct
+					where  1=1
+				and (cast(CONCAT(substring(view_manhour_ct.date,1,7),'-01') as Date) between 
+					cast(CONCAT(#{currentYear},'0401') as Date)
+						and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        	and  view_manhour_ct.times > 0 
+			)manhour_ct
+			LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+			LEFT JOIN (select email,staffID,name,position,departmentID,branchID,sort,jobCategory
+						from view_staffview_ct AS staff
+						where staff.email like CONCAT('%','@clarion.co.jp','%')
+			) AS staff ON manhour_ct.staffID=staff.staffID
+			
+			where staff.email like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_ct.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_ct.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+	          )sumCT
+	</select>
+	<select id="totalPageCount" parameterType="TotalHourManageReqParam" resultType="int" >
+	select count(1)
+	from(
+			(select distinct (concat(staff.staffID,staff.departmentID,staff.branchID)) staffNameCount,
+							staff.departmentID,
+							staff.branchID,
+							staff.staffID
+				from (select * from manhour_ct
+						where  1=1
+					 and (cast(CONCAT(substring(manhour_ct.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  manhour_ct.times > 0  
+				)manhour_ct
+				LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+				LEFT JOIN (select email,sort,staffID,departmentID,branchID
+							from view_staffview_ct as staff
+							where staff.email like CONCAT('%','@clarion.co.jp','%')
+				) AS staff ON manhour_ct.staffID=staff.staffID
+				and manhour_ct.departmentID=staff.departmentID
+				and manhour_ct.branchID=staff.branchID
+				
+				where staff.email like CONCAT('%','@clarion.co.jp','%')
+			
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo = #{sel_PJNo}
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo = #{sel_tempPJNo}
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName = #{sel_PJName}
+			</if>
+			group by manhour_ct.departmentID,manhour_ct.branchID,staff.staffID
+			
+	        ) 
+	        union all
+	        (select distinct (concat(staff.staffID,staff.departmentID,staff.branchID)) staffNameCount,
+								staff.departmentID,
+								staff.branchID,
+								staff.staffID
+			
+			from (select * from manhour_cxee
+					where 1=1
+					 and (cast(CONCAT(substring(manhour_cxee.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  manhour_cxee.times > 0  
+			)manhour_cxee
+			LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+			LEFT JOIN (select email,staffID,sort,departmentID,branchID
+						from view_staffview_cxee as staff
+						where staff.email not like CONCAT('%','@clarion.co.jp','%')
+			) AS staff ON manhour_cxee.staffID=staff.staffID 
+			and manhour_cxee.departmentID=staff.departmentID
+			and manhour_cxee.branchID=staff.branchID
+			
+			where staff.email not like CONCAT('%','@clarion.co.jp','%')
+			
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo = #{sel_PJNo}
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo = #{sel_tempPJNo}
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName = #{sel_PJName}
+			</if>
+			group by manhour_cxee.departmentID,manhour_cxee.branchID,staff.staffID
+	        ) 
+	    )counts
+	</select>
+	<select id="totalPageCountCXEE" parameterType="TotalHourManageReqParam" resultType="int" >
+	select count(1)
+	from(
+			select distinct (concat(staff.staffID,staff.departmentID,staff.branchID))
+			from (select * from view_manhour_cxee
+					where 1=1
+					 and (cast(CONCAT(substring(view_manhour_cxee.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+					 and view_manhour_cxee.times > 0
+			)manhour_cxee
+			LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+			LEFT JOIN (select staffID,email,departmentID,branchID,sort,jobCategory,name,position
+						from view_staffview_cxee AS staff
+						where staff.email not like CONCAT('%','@clarion.co.jp','%')
+			) AS staff ON manhour_cxee.staffID=staff.staffID 
+			and manhour_cxee.departmentID=staff.departmentID
+			and manhour_cxee.branchID=staff.branchID
+			
+			where staff.email not like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_cxee.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_cxee.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+			group by manhour_cxee.departmentID,manhour_cxee.branchID,staff.name,staff.position,project_cxee.projectID
+			
+	        ) page
+	</select>
+	<select id="totalPageCountCT" parameterType="TotalHourManageReqParam" resultType="int" >
+	select count(1)
+	from(
+			select distinct (concat(staff.staffID,staff.departmentID,staff.branchID))
+			from (select * from view_manhour_ct
+					where 1=1
+					 and (cast(CONCAT(substring(view_manhour_ct.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  view_manhour_ct.times > 0   
+			)manhour_ct
+			LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+			LEFT JOIN (select staffID,email,departmentID,branchID,sort,jobCategory,name,position
+						from view_staffview_ct AS staff
+						where staff.email like CONCAT('%','@clarion.co.jp','%')
+			) AS staff ON manhour_ct.staffID=staff.staffID 
+			
+			where staff.email like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_ct.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_ct.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			group by manhour_ct.departmentID,manhour_ct.branchID,staff.name,staff.position,project_ct.projectID
+	        ) softprc
+	        
+	</select>
+	
+	
+	<select id="listSearchDownload" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerResultMap">
+	select 	sort
+			,transferNo
+			,itemName
+			,projectName
+			,function
+			,jobCategory
+			,PJNo
+			,tempPJNo
+			,staffID
+			,department
+			,branch
+			,staffName
+			,position
+			,staffNamecount
+			,category
+			,projectClientNo
+			,PJName
+			,projectClientName
+			,carMaker
+			,projectID
+		   ,sum(achieve4) as achieve4,sum(achieve5) as achieve5,sum(achieve6) as achieve6,sum(achieve7) as achieve7,sum(achieve8) as achieve8,sum(achieve9) as achieve9
+		   ,sum(achieve10) as achieve10,sum(achieve11) as achieve11,sum(achieve12) as achieve12,sum(achieve1) as achieve1,sum(achieve2) as achieve2,sum(achieve3) as achieve3
+	from(
+			(
+				select  department.department               department
+					,staff.staffID					 		staffID
+					,staff.sort					 			sort
+					,project_ct.function					function
+					,project_ct.transferNo					transferNo
+					,project_ct.itemName					itemName
+					,staff.jobCategory						jobCategory
+					,project_ct.PJNo				 		PJNo
+					,project_ct.tempPJNo			 		tempPJNo
+					,project_ct.projectName		 			projectName
+					,branch.branch               			branch 
+					,staff.name                 			staffName
+					,staff.position             			position
+					,concat(staff.staffID,staff.departmentID,staff.branchID)   staffNamecount
+					,manhour_ct.category   		 			category
+					,project_ct.projectClientNo     		projectClientNo
+					,project_ct.PJName         				PJName
+					,project_ct.projectClientName   		projectClientName
+					,project_ct.carMaker            		carMaker
+					,manhour_ct.departmentID        		departmentID
+					,manhour_ct.branchID            		branchID 
+					,project_ct.projectID					projectID
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+					
+					from (select * from view_manhour_ct
+							where 1=1
+					
+							 and (cast(CONCAT(substring(view_manhour_ct.date,1,7),'-01') as Date) between 
+										cast(CONCAT(#{currentYear},'0401') as Date)
+									and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+			        		 and  view_manhour_ct.times > 0  
+					)manhour_ct
+					LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+					LEFT JOIN (select staffID,email,departmentID,branchID,name,position,jobCategory,sort
+								from view_staffview_ct AS staff
+								where staff.email like CONCAT('%','@clarion.co.jp','%')
+					) AS staff 
+						LEFT JOIN view_department_ct AS department ON staff.departmentID=department.departmentID
+						LEFT JOIN view_branch_ct AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+					ON manhour_ct.staffID=staff.staffID 
+					and manhour_ct.departmentID=staff.departmentID
+					and manhour_ct.branchID=staff.branchID
+					where staff.email like CONCAT('%','@clarion.co.jp','%')
+					
+					<if test="sel_sort != null">
+							and staff.sort = #{sel_sort}
+					</if>
+					<if test="sel_PJNo != null">
+							and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+					</if>
+					<if test="sel_tempPJNo != null">
+							and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+					</if>
+					<if test="serach_transferNo != null">
+							and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+					</if>
+					<if test="sel_category != null">
+							and manhour_ct.category = #{sel_category}
+					</if>
+					<if test="sel_carMaker != null">
+							and project_ct.carMaker = #{sel_carMaker}
+					</if>
+					<if test="sel_projectFunction != null">
+							and project_ct.function = #{sel_projectFunction}
+					</if>
+					<if test="sel_PJName != null">
+							and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+					</if>
+			 	group by staff.departmentID,staff.branchID,staff.staffID,project_ct.projectID
+			 	order by staff.departmentID,staff.branchID,staff.staffID,project_ct.projectID
+	        )
+	        union all
+	        (
+				select  department.department         			department
+					,staff.staffID					 			staffID
+					,staff.sort									sort
+					,project_cxee.function						function
+					,project_cxee.itemName						itemName
+					,project_cxee.transferNo					transferNo
+					,staff.jobCategory							jobCategory
+					,project_cxee.PJNo				 			PJNo
+					,project_cxee.tempPJNo			 			tempPJNo
+					,project_cxee.projectName		 			projectName
+					,branch.branch               				branch 
+					,staff.name                  				staffName
+					,staff.position              				position
+					,concat(staff.staffID,staff.departmentID,staff.branchID)   staffNamecount
+					,manhour_cxee.category   		 			category
+					,project_cxee.projectClientNo     			projectClientNo
+					,project_cxee.PJName         				PJName
+					,project_cxee.projectClientName   			projectClientName
+					,project_cxee.carMaker            			carMaker
+					,manhour_cxee.departmentID       			departmentID
+					,manhour_cxee.branchID            			branchID 
+					,project_cxee.projectID						projectID
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+					
+					from (select * from view_manhour_cxee
+							where 1=1
+							 and (cast(CONCAT(substring(view_manhour_cxee.date,1,7),'-01') as Date) between 
+										cast(CONCAT(#{currentYear},'0401') as Date)
+									and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+			        		 and  view_manhour_cxee.times > 0  
+					)manhour_cxee
+					LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+					LEFT JOIN (select staffID,email,departmentID,branchID,name,position,sort,jobCategory
+								from view_staffview_cxee as staff
+								where staff.email not like CONCAT('%','@clarion.co.jp','%')
+					) AS staff 
+						LEFT JOIN view_department_cxee AS department ON staff.departmentID=department.departmentID
+						LEFT JOIN view_branch_cxee AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+					ON manhour_cxee.staffID=staff.staffID 
+					and manhour_cxee.departmentID=staff.departmentID
+					and manhour_cxee.branchID=staff.branchID
+					where staff.email not like CONCAT('%','@clarion.co.jp','%')
+					
+					<if test="sel_sort != null">
+							and staff.sort = #{sel_sort}
+					</if>
+					
+					<if test="sel_PJNo != null">
+							and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+					</if>
+					<if test="sel_tempPJNo != null">
+							and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+					</if>
+					<if test="serach_transferNo != null">
+							and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+					</if>
+					<if test="sel_category != null">
+							and manhour_cxee.category = #{sel_category}
+					</if>
+					
+					<if test="sel_carMaker != null">
+							and project_cxee.carMaker = #{sel_carMaker}
+					</if>
+					<if test="sel_projectFunction != null">
+							and project_cxee.function = #{sel_projectFunction}
+					</if>
+					<if test="sel_PJName != null">
+							and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+					</if>
+			 	group by staff.departmentID,staff.branchID,staff.staffID,project_cxee.projectID
+			 	order by staff.departmentID,staff.branchID,staff.staffID,project_cxee.projectID
+	        )
+		)tabletotle 
+	where tabletotle.staffNamecount IN (
+ 		select * from (
+		(select DISTINCT (concat(staff.StaffID,staff.departmentID,staff.branchID))  
+						
+		from (select * from view_manhour_cxee
+				where 1=1
+					 and (cast(CONCAT(substring(view_manhour_cxee.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  view_manhour_cxee.times > 0   
+		)manhour_cxee
+		LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+		LEFT JOIN (select staffID,email,departmentID,branchID,sort,name,position,jobCategory
+					from view_staffview_cxee as staff
+					where staff.email not like CONCAT('%','@clarion.co.jp','%')
+		) AS staff 
+			LEFT JOIN view_department_cxee AS department ON staff.departmentID=department.departmentID
+			LEFT JOIN view_branch_cxee AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+		ON manhour_cxee.staffID=staff.staffID 
+		and manhour_cxee.departmentID=staff.departmentID
+		and manhour_cxee.branchID=staff.branchID
+		where staff.email not like CONCAT('%','@clarion.co.jp','%')
+				
+			
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+			group by staff.departmentID,staff.branchID,staff.staffID,project_cxee.projectID
+	        order by staff.departmentID,staff.branchID,staff.staffID,project_cxee.projectID
+	        )
+	    union all
+	    (select DISTINCT (concat(staff.StaffID,staff.departmentID,staff.branchID))  
+						
+		from (select* from view_manhour_ct
+				where 1=1
+					 and (cast(CONCAT(substring(view_manhour_ct.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  view_manhour_ct.times > 0   
+		)manhour_ct
+		LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+		LEFT JOIN (select staffID,departmentID,branchID,email,sort,jobCategory,position,name
+					from view_staffview_ct as staff
+					where staff.email like CONCAT('%','@clarion.co.jp','%')
+		) AS staff 
+			LEFT JOIN view_department_ct AS department ON staff.departmentID=department.departmentID
+			LEFT JOIN view_branch_ct AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+		ON manhour_ct.staffID=staff.staffID 
+		and manhour_ct.departmentID=staff.departmentID
+		and manhour_ct.branchID=staff.branchID
+		where staff.email like CONCAT('%','@clarion.co.jp','%')
+				
+			
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+			group by staff.departmentID,staff.branchID,staff.staffID,project_ct.projectID
+			order by staff.departmentID,staff.branchID,staff.staffID,project_ct.projectID
+	        )
+ 	) T1
+)
+group by departmentID,branchID,staffID,projectID
+order by departmentID,branchID,staffID,projectID
+</select>
+<select id="listSearchDownloadCXEE" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerResultMap">
+	select   sort
+			,function
+			,itemName
+			,transferNo
+			,jobCategory
+			,PJNo
+			,tempPJNo
+			,staffID
+			,department
+			,branch
+			,staffName
+			,position
+			,staffNamecount
+			,category
+			,projectClientNo
+			,projectID
+			,PJName
+			,projectClientName
+			,carMaker
+		   ,sum(achieve4) as achieve4,sum(achieve5) as achieve5,sum(achieve6) as achieve6,sum(achieve7) as achieve7,sum(achieve8) as achieve8,sum(achieve9) as achieve9,
+		   sum(achieve10) as achieve10,sum(achieve11) as achieve11,sum(achieve12) as achieve12,sum(achieve1) as achieve1,sum(achieve2) as achieve2,sum(achieve3) as achieve3
+	from(
+			select  department.department         			department
+				,staff.staffID					 			staffID
+				,staff.sort									sort
+				,project_cxee.function						function
+				,project_cxee.itemName						itemName
+				,project_cxee.transferNo					transferNo
+				,staff.jobCategory							jobCategory
+				,project_cxee.PJNo				 			PJNo
+				,project_cxee.tempPJNo			 			tempPJNo
+				,project_cxee.projectID		 				projectID
+				,project_cxee.projectName		 			projectName
+				,branch.branch               				branch 
+				,staff.name                  				staffName
+				,staff.position              				position
+				,concat(manhour_cxee.staffID,manhour_cxee.departmentID,manhour_cxee.branchID)   staffNamecount
+				,manhour_cxee.category   		 			category
+				,project_cxee.projectClientNo     			projectClientNo
+				,project_cxee.PJName         				PJName
+				,project_cxee.projectClientName   			projectClientName
+				,project_cxee.carMaker            			carMaker
+				,manhour_cxee.departmentID       			departmentID
+				,manhour_cxee.branchID            			branchID 
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+				,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+				,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+				
+				from (select * from view_manhour_cxee
+						where 1=1
+					 and (cast(CONCAT(substring(view_manhour_cxee.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  view_manhour_cxee.times > 0  
+				)manhour_cxee
+				LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+				LEFT JOIN (select staffID,email,name,departmentID,branchID,position,sort,jobCategory
+							from view_staffview_cxee AS staff
+							where staff.email not like CONCAT('%','@clarion.co.jp','%')
+				) AS staff 
+					LEFT JOIN view_department_cxee AS department ON staff.departmentID=department.departmentID
+					LEFT JOIN view_branch_cxee AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+				ON manhour_cxee.staffID=staff.staffID 
+				and manhour_cxee.departmentID=staff.departmentID
+				and manhour_cxee.branchID=staff.branchID
+				where staff.email not like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_cxee.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_cxee.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+		 	group by staff.departmentID,staff.branchID,staff.staffID,project_cxee.projectID
+    	)tabletotle 
+ 	where tabletotle.staffNamecount IN (
+ 		select * from (
+		select DISTINCT (concat(staff.StaffID,staff.departmentID,staff.branchID))
+		from (select * from view_manhour_cxee
+						where 1=1
+					 and (cast(CONCAT(substring(view_manhour_cxee.date,1,7),'-01') as Date) between 
+								cast(CONCAT(#{currentYear},'0401') as Date)
+							and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+	        		 and  view_manhour_cxee.times > 0  
+				)manhour_cxee
+		LEFT JOIN project_cxee ON manhour_cxee.projectID=project_cxee.projectID
+		LEFT JOIN (select staffID,email,name,departmentID,branchID,position,sort,jobCategory
+							from view_staffview_cxee AS staff
+							where staff.email not like CONCAT('%','@clarion.co.jp','%')
+				) AS staff 
+			LEFT JOIN view_department_cxee AS department ON staff.departmentID=department.departmentID
+			LEFT JOIN view_branch_cxee AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+			
+		ON manhour_cxee.staffID=staff.staffID 
+		and manhour_cxee.departmentID=staff.departmentID
+		and manhour_cxee.branchID=staff.branchID
+		where staff.email not like CONCAT('%','@clarion.co.jp','%')
+				
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_cxee.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_cxee.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_cxee.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_cxee.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_cxee.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_cxee.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_cxee.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_cxee.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_cxee.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+			group by staff.departmentID,staff.branchID,staff.staffID,project_cxee.projectID
+	        order by staff.departmentID,staff.branchID,staff.staffID,project_cxee.projectID,manhour_cxee.id
+ 	) T1
+)
+group by departmentID,branchID,staffID,projectID
+order by departmentID,branchID,staffID,projectID
+</select>
+<select id="listSearchDownloadCT" parameterType="TotalHourManageReqParam" resultMap="totalHourManagerResultMap">
+	select   sort
+			,jobCategory
+			,PJNo
+			,function
+			,itemName
+			,transferNo
+			,tempPJNo
+			,projectID
+			,staffID
+			,department
+			,branch
+			,staffName
+			,position
+			,staffNamecount
+			,category
+			,projectClientNo
+			,PJName
+			,projectClientName
+			,carMaker
+			,sum(achieve4) as achieve4,sum(achieve5) as achieve5,sum(achieve6) as achieve6,sum(achieve7) as achieve7,sum(achieve8) as achieve8,sum(achieve9) as achieve9
+			,sum(achieve10) as achieve10,sum(achieve11) as achieve11,sum(achieve12) as achieve12,sum(achieve1) as achieve1,sum(achieve2) as achieve2,sum(achieve3) as achieve3
+	from(
+				select  department.department 					department
+					,staff.staffID					 			staffID
+					,staff.sort					 				sort
+					,project_ct.transferNo						transferNo
+					,project_ct.itemName						itemName
+					,project_ct.function						function
+					,staff.jobCategory			 				jobCategory
+					,project_ct.PJNo				 			PJNo
+					,project_ct.tempPJNo			 			tempPJNo
+					,project_ct.projectID		 				projectID
+					,project_ct.projectName		 				projectName
+					,branch.branch               				branch 
+					,staff.name                  				staffName
+					,staff.position              				position
+					,concat(staff.staffID,staff.departmentID,staff.branchID)   staffNamecount
+					,manhour_ct.category   		 				category
+					,project_ct.projectClientNo     			projectClientNo
+					,project_ct.PJName         					PJName
+					,project_ct.projectClientName   			projectClientName
+					,project_ct.carMaker            			carMaker
+					,manhour_ct.departmentID        			departmentID
+					,manhour_ct.branchID            			branchID 
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-04') then times else 0 end  ) as achieve4
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-05') then times else 0 end  ) as achieve5
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-06') then times else 0 end  ) as achieve6
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-07') then times else 0 end  ) as achieve7
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-08') then times else 0 end  ) as achieve8
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-09') then times else 0 end  ) as achieve9
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-10') then times else 0 end  ) as achieve10
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-11') then times else 0 end  ) as achieve11
+					,sum(case substring(date,1,7) when CONCAT(#{currentYear},'-12') then times else 0 end  ) as achieve12
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-01') then times else 0 end  ) as achieve1
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-02') then times else 0 end  ) as achieve2
+					,sum(case substring(date,1,7) when CONCAT(cast(#{currentYear} as SIGNED) + 1,'-03') then times else 0 end  ) as achieve3
+					
+					from (select * from view_manhour_ct
+							where 1=1
+								 and (cast(CONCAT(substring(view_manhour_ct.date,1,7),'-01') as Date) between 
+											cast(CONCAT(#{currentYear},'0401') as Date)
+										and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+				        		 and  view_manhour_ct.times > 0  
+					)manhour_ct
+					LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+					LEFT JOIN (select staffID,email,departmentID,branchID,sort,jobCategory,name,position
+								from view_staffview_ct as staff
+								where staff.email like CONCAT('%','@clarion.co.jp','%')
+					) AS staff 
+						LEFT JOIN view_department_ct AS department ON staff.departmentID=department.departmentID
+						LEFT JOIN view_branch_ct AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+					ON manhour_ct.staffID=staff.staffID 
+					and manhour_ct.departmentID=staff.departmentID
+					and manhour_ct.branchID=staff.branchID
+					
+					where staff.email like CONCAT('%','@clarion.co.jp','%')
+					
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_ct.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_ct.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+		 	group by staff.departmentID,staff.branchID,staff.staffID,project_ct.projectID
+	        
+	) as tabletotle 
+	where tabletotle.staffNamecount IN (
+ 		select * from (
+		select DISTINCT (concat(staff.StaffID,staff.departmentID,staff.branchID))
+		from (select * from view_manhour_ct
+							where 1=1
+								 and (cast(CONCAT(substring(view_manhour_ct.date,1,7),'-01') as Date) between 
+											cast(CONCAT(#{currentYear},'0401') as Date)
+										and   cast(CONCAT(cast(#{currentYear} as SIGNED) + 1,'0301') as Date))
+				        		 and  view_manhour_ct.times > 0  
+		)manhour_ct
+		LEFT JOIN project_ct ON manhour_ct.projectID=project_ct.projectID
+		LEFT JOIN (select staffID,email,departmentID,branchID,sort,jobCategory,name,position
+					from view_staffview_ct as staff
+					where staff.email like CONCAT('%','@clarion.co.jp','%')
+		) AS staff 
+			LEFT JOIN view_department_ct AS department ON staff.departmentID=department.departmentID
+			LEFT JOIN view_branch_ct AS branch ON staff.branchID=branch.branchID and staff.departmentID=branch.departmentID
+		ON manhour_ct.staffID=staff.staffID 
+		and manhour_ct.departmentID=staff.departmentID
+		and manhour_ct.branchID=staff.branchID
+		where staff.email like CONCAT('%','@clarion.co.jp','%')
+				
+			<if test="serach_staffName != null">
+					and staff.name like CONCAT('%','${serach_staffName}','%')
+			</if>
+			<if test="sel_position != null">
+					and staff.position = #{sel_position}
+			</if>
+			<if test="sel_department != null">
+					and staff.departmentID = #{sel_department}
+			</if>
+			<if test="sel_branch != null">
+					and staff.branchID = #{sel_branch}
+			</if>
+			<if test="sel_sort != null">
+					and staff.sort = #{sel_sort}
+			</if>
+			<if test="sel_jobCategory != null">
+					and staff.jobCategory = #{sel_jobCategory}
+			</if>
+			<if test="serach_projectClientNo != null">
+					and project_ct.projectClientNo like CONCAT('%','${serach_projectClientNo}','%')
+			</if>
+			<if test="sel_PJNo != null">
+					and project_ct.PJNo like CONCAT('%','${sel_PJNo}','%')
+			</if>
+			<if test="sel_tempPJNo != null">
+					and project_ct.tempPJNo like CONCAT('%','${sel_tempPJNo}','%')
+			</if>
+			<if test="serach_transferNo != null">
+					and project_ct.transferNo like CONCAT('%','${serach_transferNo}','%')
+			</if>
+			<if test="sel_category != null">
+					and manhour_ct.category = #{sel_category}
+			</if>
+			<if test="sel_projectClientName != null">
+					and project_ct.projectClientName = #{sel_projectClientName}
+			</if>
+			<if test="sel_carMaker != null">
+					and project_ct.carMaker = #{sel_carMaker}
+			</if>
+			<if test="sel_projectFunction != null">
+					and project_ct.function = #{sel_projectFunction}
+			</if>
+			<if test="sel_PJName != null">
+					and project_ct.PJName like CONCAT('%','${sel_PJName}','%')
+			</if>
+			group by staff.departmentID,staff.branchID,staff.staffID,project_ct.projectID
+	        order by staff.departmentID,staff.branchID,staff.staffID,project_ct.projectID
+ 	) T1
+)
+group by departmentID,branchID,staffID,projectID
+order by departmentID,branchID,staffID,projectID
+</select>
+</mapper>
+	

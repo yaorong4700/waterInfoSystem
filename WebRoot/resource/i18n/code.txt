@@ -1,0 +1,38 @@
+<script type="text/javascript" src="js/jquery.i18n.properties-1.0.9.js"></script>
+<script type="text/javascript" src="js/js_user/com.js"></script>
+<script type="text/javascript" src="js/cookie/cookie.js"></script>
+
+var language = getCookieValue("language");
+if (language!="CN" && language!="JP" && language!="EN"){
+							language = "CN";
+						}
+						loadProperties(language,setPageByLanguage);
+
+//çë?âª
+		function setPageByLanguage(){
+			//ç∂?CTìo?
+			$('#login_string_CT_left').html($.i18n.prop('login_string_CT_left'));
+			$('#login_string_sysname_left').html($.i18n.prop('login_string_sysname_left'));
+			$('#login_string_systemlogin_left').html($.i18n.prop('login_string_systemlogin_left'));
+			$('#login_string_username_left').html($.i18n.prop('login_string_username_left'));
+			$('#login_string_password_left').html($.i18n.prop('login_string_password_left')); 
+			$('#login_string_rememberPassword_left').html($.i18n.prop('login_string_rememberPassword_left')); 
+			$('#login_string_loginBtn_left').html($.i18n.prop('login_string_loginBtn_left'));
+			$('#login_string_cancelBtn_left').html($.i18n.prop('login_string_cancelBtn_left'));
+			
+			$('#login_string_CXEE_right').html($.i18n.prop('login_string_CXEE_right'));
+			$('#login_string_sysname_right').html($.i18n.prop('login_string_sysname_right'));
+			$('#login_string_systemlogin_right').html($.i18n.prop('login_string_systemlogin_right'));
+			$('#login_string_username_right').html($.i18n.prop('login_string_username_right'));
+			$('#login_string_password_right').html($.i18n.prop('login_string_password_right')); 
+			$('#login_string_rememberPassword_right').html($.i18n.prop('login_string_rememberPassword_right')); 
+			$('#login_string_loginBtn_right').html($.i18n.prop('login_string_loginBtn_right'));
+			$('#login_string_cancelBtn_right').html($.i18n.prop('login_string_cancelBtn_right'));
+			
+
+			nameerrInfo = $.i18n.prop('E0001');
+			passworderrInfo = $.i18n.prop('E0002');
+			E0003 = $.i18n.prop('E0003');
+			E0004 = $.i18n.prop('E0004');
+			document.title =$.i18n.prop('login_string_title');
+		}

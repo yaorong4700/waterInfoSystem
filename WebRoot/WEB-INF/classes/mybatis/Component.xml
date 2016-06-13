@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.ComponentMapper">
+    <sql id="componentColumns">componentID,componentName,categoryID,componentSortID,isVisible</sql>
+
+	 <resultMap type="Component" id="componentResultMap">
+	 	<result column="No" property="No" />
+	 	<result column="id" property="id" />
+        <result column="componentID" property="componentID" />
+        <result column="componentName" property="componentName" />
+        <result column="categoryName" property="categoryName" />
+        <result column="componentSort" property="componentSort" />
+        <result column="componentSortID" property="componentSortID"/>
+        <result column="isVisible" property="isVisible"/>
+    </resultMap>
+        
+ 	<select id="getCategoryList" resultType="map">
+		SELECT categoryID as "categoryID",category as "categoryName" FROM project_category
+	</select>
+	
+	<select id="getComponentSortList" resultType="map">
+		SELECT componentSortID as "componentSortID",componentSortName as "componentSortName" FROM component_sort
+	</select>
+	
+    <select id="listComponent"  parameterType="ComponentReqParam" resultMap="componentResultMap">
+    	SELECT  @i:=@i+1 as No
+    		   ,c.id
+    		   ,CASE c.isVisible
+        			WHEN '1' THEN '表示'
+        			ELSE '非表示'   
+        		END as isVisible
+    	       ,c.componentID
+               ,c.componentName
+               ,pc.category categoryName
+               ,IFNULL(cs.componentSortName,'') componentSort
+          FROM  component c
+                left join component_sort cs on cs.componentSortID = c.componentSortID
+               ,project_category pc 
+               ,(select @i:=0) as dummy
+         WHERE c.categoryID = pc.categoryID
+         <if test="componentID!=null">
+           and c.componentID like CONCAT('%','${componentID}','%')
+         </if>
+         <if test="componentSort!=null">
+           and c.componentSortID like CONCAT('%','${componentSort}','%')
+         </if>
+         <if test="categoryID!=null">
+           and c.categoryID = ${categoryID}
+         </if>
+         <if test="isVisible!=null">
+           and c.isVisible = ${isVisible}
+         </if>
+    ORDER BY c.id LIMIT #{pageSeq}, #{rp}
+    </select>
+
+    <select id="totalPageCount" parameterType="ComponentReqParam" resultType="int">
+        select count(1) 
+         FROM  component c
+                left join component_sort cs on cs.componentSortID = c.componentSortID
+               ,project_category pc 
+         WHERE c.categoryID = pc.categoryID
+         <if test="componentID!=null">
+           and c.componentID like CONCAT('%','${componentID}','%')
+         </if>
+         <if test="componentSort!=null">
+           and c.componentSortID like CONCAT('%','${componentSort}','%')
+         </if>
+         <if test="categoryID!=null">
+           and c.categoryID = ${categoryID}
+         </if>
+         <if test="isVisible!=null">
+           and c.isVisible = ${isVisible}
+         </if>
+    </select>
+    <select id="listAllComponent"  resultMap="componentResultMap">
+    	SELECT  @i:=@i+1 as No
+    	       ,c.componentID
+    	       ,CASE c.isVisible
+        			WHEN '1' THEN '表示'
+        			ELSE '非表示'   
+        		END as isVisible
+               ,c.componentName
+               ,pc.category categoryName
+               ,IFNULL(cs.componentSortName,'') componentSort
+               ,c.id as id
+          FROM  component c
+          		left join component_sort cs on cs.componentSortID = c.componentSortID
+               ,project_category pc 
+                ,(select @i:=0) as dummy
+         WHERE c.categoryID = pc.categoryID
+    ORDER BY c.id 
+    </select>
+    <select id="getComponentById" parameterType="String" resultMap="componentResultMap">
+        select *
+        from component  where id = #{id}
+    </select>
+    
+    <select id="getComponentCount" parameterType="Component" resultType="int">
+        select count(*)
+          from component 
+         where categoryID = #{categoryID} 
+           and componentName = #{componentName} 
+           and componentSortID = #{componentSortID} 
+           and componentID = #{componentID}
+    </select>
+    
+    <insert id="insertComponent" parameterType="Component">
+        insert into component (
+        <include refid="componentColumns" />
+        ) SELECT #{componentID},#{componentName},#{categoryID},#{componentSortID},#{isVisible} FROM dual
+    </insert>
+    
+    <update id="updateComponent" parameterType="Component">
+        update component set
+        componentName = #{componentName},
+        categoryID = #{categoryID},
+        componentSortID = #{componentSortID},
+        componentID = #{componentID},
+        isVisible = #{isVisible} 
+        where
+        id = #{id}
+    </update>
+    <delete id="deleteComponents" >
+        delete from component where
+        	id in
+        <foreach collection="array" index="index" item="item" open="(" separator="," close=")">
+         #{item}
+       </foreach>
+    </delete>
+</mapper>

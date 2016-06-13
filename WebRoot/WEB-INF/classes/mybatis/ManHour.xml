@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.clarion.worksys.mapper.ManHourMapper">
+<sql id="calendarManhourColumns">date,category,projectID,task,times</sql>
+	
+	<resultMap type="ManHourDto" id="ManHourDtoResultMap">
+		<result column="date" property="date" />
+		<result column="category" property="category" />
+		<result column="projectID" property="projectID" />
+		<result column="task" property="task" />
+		<result column="taskRate" property="taskRate" />
+		<result column="times" property="times" />
+		<result column="projectName" property="projectName" />
+	</resultMap>
+	
+	<resultMap type="ManHour" id="ManHourResultMap">
+		<id column="id" property="id" />
+		<result column="staffID" property="staffID" />
+		<result column="date" property="date" />
+		<result column="category" property="category" />
+		<result column="projectID" property="projectID" />
+		<result column="task" property="task" />
+		<result column="taskID" property="taskID" />
+		<result column="times" property="times" />
+		<result column="memo" property="memo" />
+		<result column="projectName" property="projectName" />
+	</resultMap>
+	
+	<resultMap type="CalendarManhour" id="calendarmanhourResultMap">
+	
+		<id column="staffID" property="staffID" />
+		<result column="date" property="date" />
+		<result column="categoryName" property="categoryName" />
+		<result column="projectID" property="projectID" />
+		<result column="taskName" property="taskName" />
+		<result column="taskRate" property="taskRate" />
+		<result column="times" property="times" />
+		
+	</resultMap>
+	
+	<resultMap type="ManhourShowData" id="ManhourShowDataResultMap">
+		<id column="id" property="id"/>
+		<result column="date" property="date" />
+		<result column="category" property="category"/>
+		<result column="name" property="name"/>
+		<result column="projectName" property="projectName"/>
+		<result column="task" property="task"/>
+		<result column="taskRate" property="taskRate" />
+		<result column="times" property="times" />
+		<result column="insertTime" property="insertTime" />	
+		<result column="memo" property="memo"/>	
+		
+	</resultMap>
+	
+	<resultMap type="ManhourPersonalQueryView" id="ManhourPersonalQueryViewResultMap">
+		<result column="category" property="category"/>
+		<result column="projectName" property="projectName"/>
+		<result column="taskName" property="taskName"/>
+		<result column="totalTimes" property="totalTimes"/>
+	</resultMap>
+	
+	<resultMap type="Blacklist" id="BlacklistResultMap">
+		<result column="name" property="staffName"/>
+		<result column="department" property="staffDepartment"/>
+		<result column="superior" property="superior"/>
+		<result column="superiorEmail" property="superiorEmail"/>
+		<result column="branch" property="staffBranch"/> 
+		<result column="email" property="staffEmail"/>
+		<result column="date" property="date"/>
+		<result column="totalTimes" property="totalTimes"/>
+	</resultMap>
+	
+	<resultMap type="BlacklistCT" id="BlacklistCTResultMap">
+		<result column="name" property="staffName"/>
+		<result column="department" property="staffDepartment"/>
+		<result column="branch" property="staffBranch"/> 
+		<result column="email" property="staffEmail"/>
+		<result column="date" property="date"/>
+		<result column="totalTimes" property="totalTimes"/>
+	</resultMap>
+
+	<resultMap type="ManhourByProject" id="ManhourByProjectResultMap">
+		<result column="staffID" property="staffID"/>
+		<result column="name" property="staffName"/>
+		<result column="department" property="department"/>
+		<result column="branch" property="branch"/>
+		<result column="new_branch" property="new_branch"/>
+		<result column="email" property="Email"/>
+		<result column="totalTimes" property="totalTimes"/>
+		<result column="dev" property="devTime"/>
+		<result column="other" property="otherTime"/>
+	</resultMap>
+	<resultMap type="Component" id="componentResultMap">
+	 	<result column="id" property="id" />
+        <result column="componentName" property="componentName" />
+        <result column="categoryID" property="categoryID" />
+    </resultMap>
+    <resultMap type="ManHourDtoCT" id="ManHourDtoCTResultMap">
+		<result column="date" property="date" />
+		<result column="category" property="category" />
+		<result column="projectID" property="projectID" />
+		<result column="task" property="task" />
+		<result column="taskRate" property="taskRate" />
+		<result column="times" property="times" />
+		<result column="projectName" property="projectName" />
+		<result column="componentid" property="componentid" />
+		<result column="componentName" property="componentName" />
+	</resultMap>
+	<resultMap type="Project" id="projectResultMap">
+		<id column="projectID" property="projectID" />
+		<result column="category" property="category" />
+		<result column="projectName" property="projectName"/>
+		<result column="PJNo" property="PJNo"/>
+		<result column="tempPJNo" property="tempPJNo"/>
+		<result column="PJName" property="PJName"/>
+	</resultMap>
+	<select id="checkEditBeforeSave" parameterType="CalendarManhour" resultType="Double">
+        select IFNULL(sum(times),0)
+		from manhourview
+		where date =#{date}
+		and staffID=#{staffID}
+		and id!=#{id};
+	</select>
+	<select id="checkBeforeSave" parameterType="CalendarManhour" resultType="Double">
+        select IFNULL(sum(times),0)
+		from manhourview
+		where date =#{date}
+		and staffID=#{staffID};
+	</select>
+
+	<select id="getPersonTotalTime" parameterType="map" resultType="Double">
+		select IFNULL(sum(times),0)
+		  from manhourview
+		 where staffID   = #{staffID}  
+		   and projectID = #{projectID} 
+		   and date between #{startDate} and #{endDate};
+	</select>
+
+	<select id="getStaffName" parameterType="Integer" resultType="String">
+		select name
+		  from staffview
+		 where staffID = #{staffID} 
+	</select>
+
+	<select id="getProjectName" parameterType="Integer" resultType="String">
+		select projectName
+		  from project m
+		 where m.projectID = #{projectID} 
+	</select>
+
+	<select id="getDepartWorkNumProjectId" parameterType="map" resultType="Integer">
+        select distinct m.projectID
+		  from manhourview m
+         where m.date between #{startDate} and #{endDate}
+           and m.departmentID = #{departmentID}
+           <if test = "branchID!=null">
+           and m.branchID = #{branchID}
+	       </if>
+         order by m.projectID;
+	</select>
+
+	<select id="getDesignStaffID" parameterType="map" resultType="Integer">
+		select distinct m.staffID
+		  from manhourview m
+		  left join project p on m.projectID=p.projectID
+		 where m.date between #{startDate} and #{endDate}
+           and m.departmentID = #{departmentID}
+           <if test = "branchID!=null">
+           and m.branchID = #{branchID}
+	       </if>
+	    ;
+	</select>
+
+	<select id="listMonthHoliday" resultType="String">
+		SELECT date FROM work_calendar where able = 0 ;
+	</select>
+	
+	<!-- 获得所有的工数,暂时没用 -->
+	<select id="listAllManHour" resultMap="ManHourResultMap">
+		select * from manhour
+	</select>
+	
+	<!-- 显示所有工数,姓名部门工时  暂时废弃-->
+	<select id="ShowData" resultMap="ManhourShowDataResultMap">
+		select m.id,s.name,m.date,m.category,p.projectName,m.task,m.taskRate,m.times,m.insertTime,m.memo
+		from manhour m,project p,staffview s
+		where	s.staffID = m.staffID and m.projectID = p.projectID
+		order by m.id asc ,s.name asc,p.projectName asc
+	</select>
+	<!-- 显示所有工数,姓名部门工时 暂时废弃 -->
+	<select id="ShowAllData"  parameterType="ManhourReqParam" resultMap="ManhourShowDataResultMap">
+	    select m.id,s.name,m.date,m.category,p.projectName,m.task,m.taskRate,m.times,m.insertTime,m.memo
+	    from manhour m,project p,staffview s
+	    WHERE  s.staffID = m.staffID and m.projectID = p.projectID 
+	    and m.id NOT IN
+	   ( SELECT id FROM (SELECT m.id FROM manhour m,staffview s,project p
+	    where 1 = 1 and m.staffID = s.staffID and p.projectID = m.projectID
+	   <if test="staffName!=null">
+			and s.name like CONCAT('%','${staffName}','%')
+	   </if>
+	
+	   <if test="category!=null">
+			and m.category like CONCAT('%','${category}','%')
+	   </if>
+	
+	   <if test="projectName!=null">
+			and p.projectName like CONCAT('%','${projectName}','%')
+	   </if>
+	
+	   ORDER BY m.id  LIMIT #{pageSeq} ) AS T) 
+	   <if test="staffName!=null">
+			and s.name like CONCAT('%','${staffName}','%' )  
+	   </if> 
+	
+	   <if test="category!=null">
+			and m.category like CONCAT('%','${category}','%' )  
+	   </if> 
+	
+	   <if test="projectName!=null">
+			and p.projectName like CONCAT('%','${projectName}','%' )  
+	  </if>
+	       ORDER BY m.id  LIMIT #{rp}
+	  </select>
+	  
+	<!-- 获得所有工数页数  暂时废弃 -->
+	<select id="totalPageCount" parameterType="ManhourReqParam" resultType="int">
+	    select count(1) from manhour m,staffview s,project p where 1=1 and s.staffID=m.staffID and p.projectID = m.projectID
+		<if test="staffName!=null">
+			and s.name like CONCAT('%','${staffName}','%' )
+		</if>
+		
+	    <if test="category!=null">
+			and m.category like CONCAT('%','${category}','%')
+	   </if>
+	
+	   <if test="projectName!=null">
+			and p.projectName like CONCAT('%','${projectName}','%')
+	   </if>
+	   
+	</select>
+	
+	<!-- 获得截止时间 -->
+	<select id="getDeadline" resultType="String">
+		SELECT deadline FROM deadline;
+	</select>
+
+    <!-- 请求一个月的工数LIST -->
+	<select id="getManHourByDate" parameterType="ManhourDate" resultMap="ManHourDtoResultMap">
+	<!-- Do SomeThing -->
+		select m.id as id,m.staffID as staffID,m.date as date,CASE m.category   
+        WHEN '开发工数' THEN    case 
+        when p.projectClientName = 'CT' THEN '开发工数 CT项目'
+        ELSE '开发工数 PRC项目'
+        end 
+        ELSE m.category   
+        END as category,m.projectID as projectID,
+		m.task as task,m.taskID as taskID,m.times as times,m.memo as memo,p.projectName as projectName
+		from manhour m,project p where date >= #{startDate} and date &lt;= #{endDate} and staffID = #{staffID}
+	    and m.projectID = p.projectID
+	    order by m.date,m.id;
+	</select>
+	<!-- 请求CT一个月的工数LIST -->
+	<select id="getManHourCTByDate" parameterType="ManhourDate" resultMap="ManHourDtoCTResultMap">
+		select m.id as id,m.staffID as staffID,m.date as date, m.category as category,m.projectID as projectID,
+		m.task as task,m.taskID as taskID,m.times as times,m.memo as memo,
+		case ifnull(p.PJNo ,'')
+		when '' then concat(p.tempPJNo,' ',p.PJName) 
+		else concat (p.PJNo,' ',p.PJName)
+		end as projectName
+		,m.componentid as componentid,
+		trim(concat(ifnull(cs.componentSortName,''), ' ',ifnull(c.componentName,''))) as componentName
+		from manhour m left join component c on m.componentid = c.id left join component_sort cs on c.componentSortID = cs.componentSortID 
+		,project p where date >= #{startDate} and date &lt;= #{endDate} and staffID = #{staffID}
+	    and m.projectID = p.projectID
+	    order by m.date,m.id;
+	</select>
+	<!-- 个人工数统计查询 -->
+	<select id="ManhourPersonalQuery" parameterType="ManhourPersonalQueryParam" resultMap = "ManhourPersonalQueryViewResultMap">
+		select m.category,p.projectName,m.task as taskName, sum(m.times) as totalTimes 
+		from project p,manhour m<if test="DepartmentFlag != 1">,project_department d</if>
+		where m.staffID = #{staffID} and p.projectID = m.projectID
+		and m.date between #{startDate} and #{endDate} and concat(m.projectID,ifnull(m.taskID,0))  not in
+		(select concat(projectID ,ifnull(taskID,0)) from(select m.projectID,m.taskID from manhour m,project p
+		where m.staffID=#{staffID} and m.date between #{startDate} and #{endDate} and m.projectID=p.projectID
+		<if test="category!=null">
+			and m.category like CONCAT('%','${category}','%')
+		</if>
+		<if test="projectName!=null">
+			and p.projectName like CONCAT('%','${projectName}','%')
+		</if>
+		group by m.projectID,m.taskID order by m.category,m.projectID,m.taskID limit #{pageSeq}) as T)
+		<if test="category!=null">
+			and m.category like CONCAT('%','${category}','%')
+		</if>
+		<if test="projectName!=null">
+			and p.projectName like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="DepartmentFlag != 1">
+			and p.projectID = d.projectID
+			and d.departmentID = #{departmentID}
+		</if>
+		group by m.projectID,m.taskID order by m.category,m.projectID,m.taskID limit #{rp}
+	</select>
+	
+	<!-- 个人工数统计总数查询 -->
+	<select id="totalPageCountForPersonalQuery" parameterType="ManhourPersonalQueryParam" resultType="int">
+	    select count(*) from (select count(*) from manhour m,project p<if test="DepartmentFlag != 1">,project_department d</if>
+		where m.staffID=#{staffID} and p.projectID = m.projectID and m.date between #{startDate} and #{endDate}
+		<if test="projectName!=null">
+			and p.projectName like CONCAT('%','${projectName}','%' )
+		</if>
+		
+	    <if test="category!=null">
+			and m.category like CONCAT('%','${category}','%')
+	   </if>
+		<if test="DepartmentFlag != 1">
+			and p.projectID = d.projectID
+			and d.departmentID = #{departmentID}
+		</if>
+	   group by m.projectID, m.taskID
+	   ) as t
+	   
+	</select>
+		<!-- 个人工数统计查询 CT侧用-->
+	<select id="ManhourPersonalQueryCT" parameterType="ManhourPersonalQueryParam" resultMap = "ManhourPersonalQueryViewResultMap">
+		select m.category
+		,case ifnull(p.PJNo ,'')
+		when '' then concat(p.tempPJNo,' ',p.PJName) 
+		else concat (p.PJNo,' ',p.PJName)
+		end as projectName
+		,m.task as taskName, sum(m.times) as totalTimes 
+		from project p,manhour m<if test="DepartmentFlag != 1">,project_department d</if>
+		where m.staffID = #{staffID} and p.projectID = m.projectID
+		and m.date between #{startDate} and #{endDate} and concat(m.projectID,ifnull(m.taskID,0)) not in
+		(select concat(projectID ,ifnull(taskID,0)) from(select m.projectID,m.taskID from manhour m,project p
+		where m.staffID=#{staffID} and m.date between #{startDate} and #{endDate} and m.projectID=p.projectID
+		<if test="category!=null">
+			and m.category like CONCAT('%','${category}','%')
+		</if>
+		<if test="projectName!=null">
+			and case ifnull(p.PJNo ,'')
+		when '' then concat(p.tempPJNo,' ',p.PJName) 
+		else concat (p.PJNo,' ',p.PJName)
+		end  like CONCAT('%','${projectName}','%')
+		</if>
+		group by m.projectID,m.taskID order by m.category,m.projectID,m.taskID limit #{pageSeq}) as T)
+		<if test="category!=null">
+			and m.category like CONCAT('%','${category}','%')
+		</if>
+		<if test="projectName!=null">
+			and case ifnull(p.PJNo ,'')
+		when '' then concat(p.tempPJNo,' ',p.PJName) 
+		else concat (p.PJNo,' ',p.PJName)
+		end  like CONCAT('%','${projectName}','%')
+		</if>
+		<if test="DepartmentFlag != 1">
+			and p.projectID = d.projectID
+			and d.departmentID = #{departmentID}
+		</if>
+		group by m.projectID,m.taskID order by m.category,m.projectID,m.taskID limit #{rp}
+	</select>
+	<!-- 个人工数统计总数查询 CT侧用-->
+	<select id="totalPageCountForPersonalQueryCT" parameterType="ManhourPersonalQueryParam" resultType="int">
+	    select count(*) from (select count(*) from manhour m,project p<if test="DepartmentFlag != 1">,project_department d</if>
+		where m.staffID=#{staffID} and p.projectID = m.projectID and m.date between #{startDate} and #{endDate}
+		<if test="projectName!=null">
+			and case ifnull(p.PJNo ,'')
+		when '' then concat(p.tempPJNo,' ',p.PJName) 
+		else concat (p.PJNo,' ',p.PJName)
+		end like CONCAT('%','${projectName}','%' )
+		</if>
+		
+	    <if test="category!=null">
+			and m.category like CONCAT('%','${category}','%')
+	   </if>
+		<if test="DepartmentFlag != 1">
+			and p.projectID = d.projectID
+			and d.departmentID = #{departmentID}
+		</if>
+	   group by m.projectID, m.taskID
+	   ) as t
+	   
+	</select>
+	<!-- 工数黑名单功能 -->
+	<!-- 调用存储过程
+	<select id="AAA" parameterType="java.util.Map"  statementType="CALLABLE" resultType="String">
+   	<![CDATA[
+         { CALL 存储过程名(
+          #{参数,mode=IN,jdbcType=VARCHAR},
+          	固定参数,
+          #{返回参数,mode=OUT,jdbcType=VARCHAR}
+          )}
+        ]]>
+ 	</select> 
+  	-->
+	
+	<update id="callCheckError" parameterType="ManhourCheckErrorParam" statementType="CALLABLE" >
+	<![CDATA[
+		{ CALL checkerror2(
+		 #{startDate,mode=IN,jdbcType=DATE},
+		 #{endDate,mode=IN,jdbcType=DATE},
+		 #{createStaffID,mode=IN,jdbcType=INTEGER}
+		)}
+	]]>
+	</update>
+	
+    <select id="selectBlacklist" parameterType="ManhourCheckErrorParam" resultMap="BlacklistResultMap">
+        select t.name
+              ,t.department
+              ,t.superior
+              ,t.email1 as superiorEmail
+              ,t.branch
+              ,t.email
+              ,t.date
+              ,t.totalTimes
+          from worktimecxee t
+          where t.date between CAST(#{startDate} AS DATETIME) and CAST(#{endDate} AS DATETIME)
+        <if test="name!=null">
+            and t.name like CONCAT('%','${name}','%')
+        </if>
+        <if test="serachSuperior!=null">
+            and t.superior like CONCAT('%','${serachSuperior}','%')
+        </if>
+        <if test="departmentID!=null">
+            and t.departmentID = #{departmentID}
+        </if>
+        <if test="branchID!=null">
+            and t.branchID = #{branchID}
+        </if>
+         order by t.department desc,t.branch,t.staffID,t.date limit #{pageSeq},#{rp}
+    </select>
+    
+    <select id="selectBlacklistCT" parameterType="ManhourCheckErrorParam" resultMap="BlacklistResultMap">
+          select s.name
+              ,d.department
+              ,b.branch
+              ,s.email
+              ,s.date
+              ,ifnull(t.totalTimes,0) as totalTimes
+          from (select * from work_calendar w,staff s) s left outer join worktimect t
+          on s.staffID=t.staffID and s.date=t.date
+          join department d ON (s.departmentID = d.departmentID)
+          left outer join branch b ON (s.branchID = b.branchID
+          and s.departmentID = b.departmentID
+          )
+          where (t.date between CAST(#{startDate} AS DATETIME) and CAST(#{endDate} AS DATETIME) or t.date is null)
+            and (s.date between CAST(#{startDate} AS DATETIME) and CAST(#{endDate} AS DATETIME) or s.date is null)
+			and s.able = 1
+        <if test="name!=null">
+            and s.name like CONCAT('%','${name}','%')
+        </if>
+        <if test="departmentID!=null">
+            and s.departmentID = #{departmentID}
+        </if>
+        <if test="branchID!=null">
+            and s.branchID = #{branchID}
+        </if>
+        group by s.staffID,s.date
+        order by s.staffID,s.date,d.department desc,b.branch limit #{pageSeq},#{rp}
+    </select>
+    
+    <select id="selectAllBlacklistCT" parameterType="ManhourCheckErrorParam" resultMap="BlacklistCTResultMap">
+        select s.name
+              ,d.department
+              ,b.branch
+              ,s.email
+              ,s.date
+              ,ifnull(t.totalTimes,0) as totalTimes
+          from (select * from work_calendar w,staff s) s left outer join worktimect t
+          on s.staffID=t.staffID and s.date=t.date
+          join department d ON (s.departmentID = d.departmentID)
+          left outer join branch b ON (s.branchID = b.branchID
+          and s.departmentID = b.departmentID
+          )
+          where (t.date between CAST(#{startDate} AS DATETIME) and CAST(#{endDate} AS DATETIME) or t.date is null)
+            and (s.date between CAST(#{startDate} AS DATETIME) and CAST(#{endDate} AS DATETIME) or s.date is null)
+			and s.able = 1
+        <if test="name!=null">
+            and s.name like CONCAT('%','${name}','%')
+        </if>
+        <if test="departmentID!=null">
+            and s.departmentID = #{departmentID}
+        </if>
+        <if test="branchID!=null">
+            and s.branchID = #{branchID}
+        </if>
+        group by s.staffID,s.date
+        order by s.staffID,s.date,d.department desc,b.branch
+    </select>
+	
+	<select id="selectAllBlacklist" resultMap="BlacklistResultMap">
+	    select t.name
+              ,t.department
+              ,t.superior
+              ,t.email1 as superiorEmail
+              ,t.branch
+              ,t.email
+              ,t.date
+              ,t.totalTimes
+          from worktimecxee t
+          where t.date between #{startDate} and #{endDate}
+        <if test="name!=null">
+            and t.name like CONCAT('%','${name}','%')
+        </if>
+        <if test="serachSuperior!=null">
+            and t.superior like CONCAT('%','${serachSuperior}','%')
+        </if>
+        <if test="departmentID!=null">
+            and t.departmentID = #{departmentID}
+        </if>
+        <if test="branchID!=null">
+            and t.branchID = #{branchID}
+        </if>
+        order by t.department desc,t.branch,t.staffID,t.date		
+	</select>
+	
+	<select id="getTotalWorkday" parameterType="ManhourCheckErrorParam" resultType="int">
+		select count(*)
+          from work_calendar t
+         where t.able=1 and t.date between #{startDate} and #{endDate}
+	</select>
+	
+	<select id="getManhourTotalTimesCT" parameterType="ManhourCheckErrorParam" resultMap="BlacklistCTResultMap">
+       select s.name
+              ,d.department
+              ,b.branch
+              ,s.email
+              ,'' as date
+              ,sum(ifnull(t.totalTimes,0)) as totalTimes
+          from staff s left outer join worktimect t
+          on s.staffID=t.staffID
+          join department d ON (s.departmentID = d.departmentID)
+          left outer join branch b ON (s.branchID = b.branchID
+          and s.departmentID = b.departmentID
+          )
+          where (t.date between CAST(#{startDate} AS DATETIME) and CAST(#{endDate} AS DATETIME) or t.date is null)
+        <if test="name!=null">
+            and s.name like CONCAT('%','${name}','%')
+        </if>
+        <if test="departmentID!=null">
+            and s.departmentID = #{departmentID}
+        </if>
+        <if test="branchID!=null">
+            and s.branchID = #{branchID}
+        </if>
+        group by s.staffID
+        order by s.staffID,d.department desc,b.branch
+	</select>
+	
+	<select id="TotalPageCountForBlacklist" parameterType="ManhourCheckErrorParam" resultType="int">
+		select count(1)
+          from worktimecxee t
+         where t.date between CAST(#{startDate} AS DATETIME) and CAST(#{endDate} AS DATETIME)
+		<if test="name!=null">
+			and t.name like CONCAT('%','${name}','%')
+		</if>
+		<if test="serachSuperior!=null">
+			and t.superior like CONCAT('%','${serachSuperior}','%')
+		</if>
+		<if test="departmentID!=null">
+			and t.departmentID = #{departmentID}
+		</if>
+		<if test="branchID!=null">
+			and t.branchID = #{branchID}
+		</if>
+	</select>
+	
+	<select id="TotalPageCountForBlacklistCT" parameterType="ManhourCheckErrorParam" resultType="int">
+		select count(*) from (select count(*) num
+          from (select * from work_calendar w,staff s) s left outer join worktimect t
+          on s.staffID=t.staffID and s.date=t.date
+          join department d ON (s.departmentID = d.departmentID)
+          left outer join branch b ON (s.branchID = b.branchID
+          and s.departmentID = b.departmentID
+          )
+          where (t.date between #{startDate} and #{endDate} or t.date is null)
+            and (s.date between CAST(#{startDate} AS DATETIME) and CAST(#{endDate} AS DATETIME) or s.date is null)
+			and s.able = 1
+        <if test="name!=null">
+            and s.name like CONCAT('%','${name}','%')
+        </if>
+        <if test="departmentID!=null">
+            and s.departmentID = #{departmentID}
+        </if>
+        <if test="branchID!=null">
+            and s.branchID = #{branchID}
+        </if>
+        group by s.staffID,s.date) worktimecttemp 
+	</select>
+
+	<update id="updateManHour" parameterType="calendarmanhour">
+	<!-- Do SomeThing -->
+		update manhour set
+		date = #{date},
+		category = #{categoryName},
+		projectID = #{projectID},
+		task = #{taskName},
+		taskID = #{taskID},
+		departmentID = #{departmentID},
+		branchID = #{branchID},
+		taskRate = #{taskRate},
+		times = #{times},
+		componentid = #{componentid}
+		where id = #{id}
+	</update>
+
+	<insert id="insertCalendarManhour" parameterType="calendarmanhour" useGeneratedKeys="true" keyProperty="id">
+		insert into manhour (staffID,date,category,projectID,task,taskID,departmentID,branchID,taskRate,times,componentid)
+		values (#{staffID},#{date},#{categoryName},#{projectID},#{taskName},#{taskID},#{departmentID},#{branchID},#{taskRate},#{times},#{componentid})
+	</insert>
+
+	<delete id="deleteManHour" parameterType="int">
+	<!-- Do SomeThing -->
+		delete from manhour where id = #{id}
+	</delete>
+
+    <!-- 工数总查询！！！ -->
+    <select id="totalHourQuery" parameterType="ManhourPersonalQueryParam" resultMap="ManhourPersonalQueryViewResultMap">
+        select p.category
+              ,p.projectname
+              ,sum(m.times) as totalTimes
+          from manhourview m
+         inner join project p on m.projectID = p.projectID
+         inner join staffview s on m.staffid = s.staffid
+         where m.date between #{startDate} and #{endDate}
+           <if test = "task!=null">
+           and m.task = #{task}
+           </if>
+           <if test = "projectClientName!=null">
+           and p.projectClientName = #{projectClientName}
+           </if>
+           <if test = "function!=null">
+           and p.function = #{function}
+           </if>
+           <if test = "category!=null">
+           and p.category like CONCAT('%','${category}','%')
+           </if>
+           <if test = "projectName">
+           and p.projectName like CONCAT('%','${projectName}','%')
+           </if>
+           <if test = "name!=null">
+           and s.name = #{name}
+           </if>
+           <if test = "name==null and branchID!=null">
+           and m.branchID = #{branchID}
+           </if>
+           <if test = "name==null and branchID==null and departmentID!=null">
+           and m.departmentID = #{departmentID}
+           </if>
+        group by m.projectid
+        order by p.category ,p.projectName
+        limit #{pageSeq}, #{rp};
+    </select>
+
+    <select id="TotalPageCountForTotalHourQuery" parameterType="ManhourPersonalQueryParam" resultType="int">
+        select count(1)
+          from (select p.projectid
+                  from project p
+                 inner join manhourview m on p.projectID =m.projectID
+                 inner join staffview s on m.staffID=s.staffID
+                 where m.date between #{startDate} and #{endDate}
+                   <if test="task!=null">
+                   and m.task=#{task}
+                   </if>
+                   <if test="projectClientName!=null">
+                   and p.projectClientName=#{projectClientName}
+                   </if>
+                   <if test="function!=null">
+                   and p.function=#{function}
+                   </if>
+                   <if test="category!=null">
+                   and p.category like CONCAT('%','${category}','%')
+                   </if>
+                   <if test="projectName!=null">
+                   and p.projectName like CONCAT('%','${projectName}','%')
+                   </if>
+                   <if test = "name!=null">
+                   and s.name = #{name}
+                   </if>
+                   <if test = "name==null and branchID!=null">
+                   and m.branchID = #{branchID}
+                   </if>
+                   <if test = "name==null and branchID==null and departmentID!=null">
+                   and m.departmentID = #{departmentID}
+                   </if>
+                 group by m.projectid) as t;
+    </select>
+
+  	<select id="getHourByProject" parameterType="ManhourPersonalQueryParam" resultMap="ManhourByProjectResultMap">
+        select m.staffID as staffID
+              ,s.name as name
+              ,m.department as department
+              ,m.branch as branch
+              ,s.branch as new_branch
+              ,s.email as email
+              ,sum(CASE WHEN m.taskmemo = '开发'
+                   THEN m.times
+                   ELSE 0
+                   END) dev
+               <!-- 185 工程设计部CT 与 185 工程设计部DCOE 底下全部是附带工数！ -->
+              ,sum(CASE WHEN (m.taskmemo  = '附带'
+                           or m.projectID = '286'
+                           or m.projectID = '304')
+                   THEN m.times
+                   ELSE 0
+                   END) other
+              ,sum(CASE WHEN m.taskmemo = '开发' THEN m.times ELSE 0 END) dev
+              ,sum(CASE WHEN m.taskmemo = '附带' THEN m.times ELSE 0 END) other
+              ,sum(m.times) as totalTimes
+         from manhourview m
+        inner join staffview s on m.staffID = s.staffID
+        where m.projectID  = #{staffID} <!-- hourManagerByProject 参数‘staffID’指的是项目编号 -->
+          and m.date between #{startDate} and #{endDate}
+        <if test="departmentID!=null">
+          and m.departmentID = #{departmentID}
+        </if>
+        group by m.staffID
+        order by m.department desc, m.branch, m.staffID
+        limit #{pageSeq}, #{rp}
+  	</select>
+
+  	<select id="totalPageCountForGetHourByProject" parameterType="ManhourPersonalQueryParam" resultType="int">
+  		select count(1) from(select s.staffID,s.name,s.department,s.branch,s.email,sum(m.times) as totalTimes
+		from staffview s,manhour m
+		where s.staffID = m.staffID 
+		<if test="departmentID!=null">
+			and s.departmentID=#{departmentID} 
+		</if>
+		and m.date between #{startDate} and #{endDate} and m.projectID = #{staffID}
+		group by m.staffID order by s.branch,s.staffID)as t;
+  	</select>
+	<select id="getCategoryList" resultType="map">
+		SELECT categoryID as "categoryID",category as "categoryName" FROM project_category order by categoryID
+	</select>
+	<select id="getComponentSelectInfo" resultMap="componentResultMap">
+		select trim(concat(ifnull(cs.componentSortName,''), ' ',c.componentName)) as componentName
+	       		,c.id as id
+	       		,c.categoryID as categoryID
+			from component c
+	    	left join component_sort cs on c.componentSortID = cs.componentSortID
+	    	where c.isVisible = '1'
+		order by categoryID,id,c.componentSortID
+	</select>
+	<!-- list all task by category and department-->
+	<select id="listCTTask" parameterType="map" resultType="map" >
+	    SELECT taskID,task 
+	      FROM projecttaskview 
+	     where category = #{category} 
+	       AND departmentID = #{departmentID}
+	       and isVisible = '1'
+	    order by task
+	</select>
+	<select id="listAllProjectCT"  parameterType="map" resultMap="projectResultMap">
+		SELECT *
+		  FROM project p
+		  <!-- LEFT JOIN project_department d ON d.projectID = p.projectID -->
+		  ,project_department d
+		 WHERE p.projectState = 1
+		   AND d.projectID = p.projectID
+		   AND (d.departmentID = #{departmentID} OR d.departmentID IS NULL)
+		   AND NOT EXISTS (SELECT 1
+		                     FROM manhour m
+		                    WHERE p.projectID = m.projectID
+                              AND m.staffID   = #{staffID}
+		                      AND m.date      > date_add(curdate(), interval - 30 DAY)
+		                  )
+		ORDER BY p.PJNo, p.tempPJNo
+	</select>
+
+	<select id="recentProjectCT" parameterType="map" resultMap="projectResultMap">
+		SELECT *
+		  FROM project p
+		 INNER JOIN project_department pd ON p.projectID = pd.projectID
+		 INNER JOIN manhour m             ON p.projectID = m.projectID
+		 WHERE p.projectState  = 1
+		   AND m.date          > date_add(curdate(), interval - 30 day)
+		   AND m.staffID       = #{staffID}
+		   AND pd.departmentID = #{departmentID}
+         GROUP BY p.projectid
+         order by p.PJNo, p.tempPJNo
+	</select>
+</mapper>
